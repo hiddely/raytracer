@@ -41,15 +41,35 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
     std::vector<Triangle> triangles = MyMesh.triangles;
     std::vector<Vertex> vertices = MyMesh.vertices;
-    for(std::vector<Triangle>::iterator it = triangles.begin(); it != triangles.end(); ++it) {
+    for(std::vector<int>::size_type i = 0; i != triangles.size(); i++) {
         /* std::cout << *it; ... */
         // single triangle
-        Triangle t = *it;
+        Triangle triangle = triangles[i];
         
         // d in n
         
-        Vec3Df normal = surfaceNormalTriangle(vertices[t.v[0]], vertices[t.v[1]], vertices[t.v[2]]);
+        Vec3Df normal = surfaceNormalTriangle(vertices[triangle.v[0]], vertices[triangle.v[1]], vertices[triangle.v[2]]);
+        float ndotd = normal.dotProduct(normal, dest);
         
+        // calculate if our ray has a non-zero dot product with the normal
+        if (ndotd != 0) {
+            Vec3Df D = normal.projectOntoVector(vertices[triangle.v[0]].p, normal);
+            float odotn = normal.dotProduct(normal, origin);
+            
+            float t = (D.getLength()-odotn)/ndotd;
+            
+            // now we have t, check if we are inside the triangle
+            Vec3Df p = origin + t * dest;
+            // but p is also ... = a * v0 + b * v1 + (1-a-b) * v2
+            
+            if (fabs(p[0] - vertices[triangle.v[0]].p[0]) < 1 && fabs(p[1] - vertices[triangle.v[0]].p[1]) < 1 && fabs(p[2] - vertices[triangle.v[0]].p[2]) < 1) {
+                return getTriangleColor(i);
+            }
+            
+            //std::cout << "T:"<<t<<"\n";
+            
+            //return Vec3Df;
+        }
         
     }
     
@@ -64,6 +84,13 @@ Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex 
     product.normalize();
     
     return product;
+}
+
+Vec3Df getTriangleColor(const unsigned int triangleIndex) {
+    Material m = MyMesh.materials[MyMesh.triangleMaterials[triangleIndex]];
+    
+    // for now return ambient value
+    return m.Kd();
 }
 
 void yourDebugDraw()

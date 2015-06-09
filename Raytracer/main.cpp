@@ -32,8 +32,8 @@ std::vector<Vec3Df> MyLightPositions;
 //Main mesh 
 Mesh MyMesh; 
 
-unsigned int WindowSize_X = 800;  // resolution X
-unsigned int WindowSize_Y = 800;  // resolution Y
+unsigned int WindowSize_X = 80;  // resolution X
+unsigned int WindowSize_Y = 80;  // resolution Y
 
 
 
@@ -256,7 +256,7 @@ void keyboard(unsigned char key, int x, int y)
 				result.setPixel(x,y, RGBValue(rgb[0], rgb[1], rgb[2]));
 			}
 
-		result.writeImage("result.ppm");
+		result.writeImage("/Users/hidde/Desktop/result.ppm");
 		break;
 	}
 	case 27:     // touche ESC
