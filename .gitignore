@@ -27,5 +27,11 @@
 *.out
 *.app
 
-*.xcodeproj
+# Mac
+.DS_Store
+
+# Xcode
+*.xcodeproj/
+
+# Path header
 paths.h
