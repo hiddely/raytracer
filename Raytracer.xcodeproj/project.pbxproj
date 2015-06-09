@@ -7,7 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CB50FA881B270DFC00B933AD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB50FA871B270DFC00B933AD /* main.cpp */; };
+		CB50FA9D1B270E2500B933AD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB50FA931B270E2500B933AD /* main.cpp */; };
+		CB50FA9E1B270E2500B933AD /* mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB50FA951B270E2500B933AD /* mesh.cpp */; };
+		CB50FA9F1B270E2500B933AD /* raytracing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB50FA981B270E2500B933AD /* raytracing.cpp */; };
+		CB50FAA11B270E4100B933AD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB50FAA01B270E4100B933AD /* OpenGL.framework */; };
+		CB50FAA31B270E4700B933AD /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB50FAA21B270E4700B933AD /* GLUT.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +28,23 @@
 
 /* Begin PBXFileReference section */
 		CB50FA841B270DFC00B933AD /* Raytracer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Raytracer; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB50FA871B270DFC00B933AD /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		CB50FA8E1B270E2500B933AD /* cube.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = cube.mtl; path = ../../../../Downloads/RaytracingProject/cube.mtl; sourceTree = "<group>"; };
+		CB50FA8F1B270E2500B933AD /* cube.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = cube.obj; path = ../../../../Downloads/RaytracingProject/cube.obj; sourceTree = "<group>"; };
+		CB50FA901B270E2500B933AD /* dodgeColorTest.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = dodgeColorTest.mtl; path = ../../../../Downloads/RaytracingProject/dodgeColorTest.mtl; sourceTree = "<group>"; };
+		CB50FA911B270E2500B933AD /* dodgeColorTest.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = dodgeColorTest.obj; path = ../../../../Downloads/RaytracingProject/dodgeColorTest.obj; sourceTree = "<group>"; };
+		CB50FA921B270E2500B933AD /* imageWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imageWriter.h; path = ../../../../Downloads/RaytracingProject/imageWriter.h; sourceTree = "<group>"; };
+		CB50FA931B270E2500B933AD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../../Downloads/RaytracingProject/main.cpp; sourceTree = "<group>"; };
+		CB50FA941B270E2500B933AD /* matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = matrix.h; path = ../../../../Downloads/RaytracingProject/matrix.h; sourceTree = "<group>"; };
+		CB50FA951B270E2500B933AD /* mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mesh.cpp; path = ../../../../Downloads/RaytracingProject/mesh.cpp; sourceTree = "<group>"; };
+		CB50FA961B270E2500B933AD /* mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mesh.h; path = ../../../../Downloads/RaytracingProject/mesh.h; sourceTree = "<group>"; };
+		CB50FA971B270E2500B933AD /* Project.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Project.pdf; path = ../../../../Downloads/RaytracingProject/Project.pdf; sourceTree = "<group>"; };
+		CB50FA981B270E2500B933AD /* raytracing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raytracing.cpp; path = ../../../../Downloads/RaytracingProject/raytracing.cpp; sourceTree = "<group>"; };
+		CB50FA991B270E2500B933AD /* raytracing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = raytracing.h; path = ../../../../Downloads/RaytracingProject/raytracing.h; sourceTree = "<group>"; };
+		CB50FA9A1B270E2500B933AD /* traqueboule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = traqueboule.h; path = ../../../../Downloads/RaytracingProject/traqueboule.h; sourceTree = "<group>"; };
+		CB50FA9B1B270E2500B933AD /* Vec3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vec3D.h; path = ../../../../Downloads/RaytracingProject/Vec3D.h; sourceTree = "<group>"; };
+		CB50FA9C1B270E2500B933AD /* Vertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vertex.h; path = ../../../../Downloads/RaytracingProject/Vertex.h; sourceTree = "<group>"; };
+		CB50FAA01B270E4100B933AD /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		CB50FAA21B270E4700B933AD /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +52,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB50FAA31B270E4700B933AD /* GLUT.framework in Frameworks */,
+				CB50FAA11B270E4100B933AD /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,6 +63,8 @@
 		CB50FA7B1B270DFC00B933AD = {
 			isa = PBXGroup;
 			children = (
+				CB50FAA21B270E4700B933AD /* GLUT.framework */,
+				CB50FAA01B270E4100B933AD /* OpenGL.framework */,
 				CB50FA861B270DFC00B933AD /* Raytracer */,
 				CB50FA851B270DFC00B933AD /* Products */,
 			);
@@ -57,7 +81,21 @@
 		CB50FA861B270DFC00B933AD /* Raytracer */ = {
 			isa = PBXGroup;
 			children = (
-				CB50FA871B270DFC00B933AD /* main.cpp */,
+				CB50FA8E1B270E2500B933AD /* cube.mtl */,
+				CB50FA8F1B270E2500B933AD /* cube.obj */,
+				CB50FA901B270E2500B933AD /* dodgeColorTest.mtl */,
+				CB50FA911B270E2500B933AD /* dodgeColorTest.obj */,
+				CB50FA921B270E2500B933AD /* imageWriter.h */,
+				CB50FA931B270E2500B933AD /* main.cpp */,
+				CB50FA941B270E2500B933AD /* matrix.h */,
+				CB50FA951B270E2500B933AD /* mesh.cpp */,
+				CB50FA961B270E2500B933AD /* mesh.h */,
+				CB50FA971B270E2500B933AD /* Project.pdf */,
+				CB50FA981B270E2500B933AD /* raytracing.cpp */,
+				CB50FA991B270E2500B933AD /* raytracing.h */,
+				CB50FA9A1B270E2500B933AD /* traqueboule.h */,
+				CB50FA9B1B270E2500B933AD /* Vec3D.h */,
+				CB50FA9C1B270E2500B933AD /* Vertex.h */,
 			);
 			path = Raytracer;
 			sourceTree = "<group>";
@@ -118,7 +156,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB50FA881B270DFC00B933AD /* main.cpp in Sources */,
+				CB50FA9F1B270E2500B933AD /* raytracing.cpp in Sources */,
+				CB50FA9E1B270E2500B933AD /* mesh.cpp in Sources */,
+				CB50FA9D1B270E2500B933AD /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
