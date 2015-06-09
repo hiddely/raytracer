@@ -174,6 +174,7 @@ public:
     unsigned int v[3];
 	//texture coordinate
     unsigned int t[3];
+     
 };
 
 /************************************************************

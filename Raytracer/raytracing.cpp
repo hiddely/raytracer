@@ -39,10 +39,32 @@ void init()
 //return the color of your pixel.
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
+    std::vector<Triangle> triangles = MyMesh.triangles;
+    std::vector<Vertex> vertices = MyMesh.vertices;
+    for(std::vector<Triangle>::iterator it = triangles.begin(); it != triangles.end(); ++it) {
+        /* std::cout << *it; ... */
+        // single triangle
+        Triangle t = *it;
+        
+        // d in n
+        
+        Vec3Df normal = surfaceNormalTriangle(vertices[t.v[0]], vertices[t.v[1]], vertices[t.v[2]]);
+        
+        
+    }
+    
 	return Vec3Df(dest[0],dest[1],dest[2]);
 }
 
 
+// calculates the surface normal vector n
+Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex & v2) {
+    
+    Vec3Df product = v0.p.crossProduct((v0.p-v2.p), (v1.p-v2.p));
+    product.normalize();
+    
+    return product;
+}
 
 void yourDebugDraw()
 {
