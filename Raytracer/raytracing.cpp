@@ -45,10 +45,17 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
         /* std::cout << *it; ... */
         // single triangle
         Triangle triangle = triangles[i];
+        Vertex v0 = vertices[triangle.v[0]];
+        Vertex v1 = vertices[triangle.v[1]];
+        Vertex v2 = vertices[triangle.v[2]];
+
         
         // d in n
         
-        Vec3Df normal = surfaceNormalTriangle(vertices[triangle.v[0]], vertices[triangle.v[1]], vertices[triangle.v[2]]);
+        Vec3Df normal = surfaceNormalTriangle(v0, v1, v2);
+        if (normal.dotProduct(normal, v0.p) < 0) {
+            normal = -1 * normal;
+        }
         float ndotd = normal.dotProduct(normal, dest);
         
         // calculate if our ray has a non-zero dot product with the normal
@@ -62,7 +69,12 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
             Vec3Df p = origin + t * dest;
             // but p is also ... = a * v0 + b * v1 + (1-a-b) * v2
             
-            if (fabs(p[0] - vertices[triangle.v[0]].p[0]) < 1 && fabs(p[1] - vertices[triangle.v[0]].p[1]) < 1 && fabs(p[2] - vertices[triangle.v[0]].p[2]) < 1) {
+            float a, b, c;
+            computeBarycentric(p, v0.p, v1.p, v2.p, a, b, c);
+            
+            if (!(a < 0 || a > 1 || b < 0 || a+b > 1)) {
+                // we are inside triangle
+                
                 return getTriangleColor(i);
             }
             
@@ -91,6 +103,24 @@ Vec3Df getTriangleColor(const unsigned int triangleIndex) {
     
     // for now return ambient value
     return m.Kd();
+}
+
+void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w)
+{
+    Vec3Df v0 = b - a, v1 = c - a, v2 = p - a;
+    float d00 = v0.dotProduct(v0, v0);
+    float d01 = v0.dotProduct(v0, v1);
+    float d11 = v0.dotProduct(v1, v1);
+    float d20 = v0.dotProduct(v2, v0);
+    float d21 = v0.dotProduct(v2, v1);
+    float denom = d00 * d11 - d01 * d01;
+    v = (d11 * d20 - d01 * d21) / denom;
+    w = (d00 * d21 - d01 * d20) / denom;
+    u = 1.0f - v - w;
+}
+
+bool equals(const Vec3Df & one, const Vec3Df & two) {
+    return fabs(one[0] - two[0]) < 1 && fabs(one[1] - two[1]) < 1 && fabs(one[2] - two[2]) < 1;
 }
 
 void yourDebugDraw()
