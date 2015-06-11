@@ -81,10 +81,12 @@
   <ItemGroup>
     <None Include="..\Raytracer\cube.mtl" />
     <None Include="..\Raytracer\dodgeColorTest.mtl" />
+    <None Include="..\Raytracer\HumanMesh.mtl" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="..\Raytracer\cube.obj" />
     <Object Include="..\Raytracer\dodgeColorTest.obj" />
+    <Object Include="..\Raytracer\HumanMesh.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
