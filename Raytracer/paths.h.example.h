@@ -11,5 +11,6 @@
 
 // UPDATE THIS LINE TO YOUR OWN PATH
 #define MESH_PATH "/Users/hidde/Desktop/raytracer/Raytracer/Raytracer/dodgeColorTest.obj"
+#define IMAGE_PATH "/Users/hidde/Desktop/result.ppm"
 
 #endif

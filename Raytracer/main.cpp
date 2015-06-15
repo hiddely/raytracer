@@ -12,6 +12,7 @@
 #include "mesh.h"
 #include "traqueboule.h"
 #include "imageWriter.h"
+#include "paths.h"
 
 
 //This is the main application
@@ -30,10 +31,10 @@ Vec3Df MyCameraPosition;
 std::vector<Vec3Df> MyLightPositions;
 
 //Main mesh 
-Mesh MyMesh; 
+Mesh MyMesh;
 
-unsigned int WindowSize_X = 80;  // resolution X
-unsigned int WindowSize_Y = 80;  // resolution Y
+unsigned int WindowSize_X = 160;  // resolution X
+unsigned int WindowSize_Y = 160;  // resolution Y
 
 
 
@@ -256,7 +257,9 @@ void keyboard(unsigned char key, int x, int y)
 				result.setPixel(x,y, RGBValue(rgb[0], rgb[1], rgb[2]));
 			}
 
-		result.writeImage("/Users/hidde/Desktop/result.ppm");
+		result.writeImage(IMAGE_PATH);
+        
+        //std::cout<<"Traced in "<< <<" seconds.";
 		break;
 	}
 	case 27:     // touche ESC

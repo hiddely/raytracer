@@ -40,6 +40,7 @@ void init()
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
     std::vector<Triangle> triangles = MyMesh.triangles;
+    //std::cout<<"Nr "<<triangles.size()<<"\n";
     std::vector<Vertex> vertices = MyMesh.vertices;
     for(std::vector<int>::size_type i = 0; i != triangles.size(); i++) {
         /* std::cout << *it; ... */
@@ -85,7 +86,7 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
         
     }
     
-	return Vec3Df(dest[0],dest[1],dest[2]);
+	return Vec3Df(0,0,0);
 }
 
 
