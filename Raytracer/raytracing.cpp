@@ -146,7 +146,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             
             float costheta = surfaceNormal.dotProduct(surfaceNormal, direction) / direction.getLength();
             
-            Vec3Df diffuse = lightintensity_ambient * powf(costheta, 1) * m.Kd();
+            Vec3Df diffuse = lightintensity_ambient * powf(costheta, 5) * m.Kd();
         
             //std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
 
@@ -156,7 +156,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             link.normalize();
             Vec3Df specular = lightintensity_ambient * powf(link.dotProduct(link, surfaceNormal), n) * m.Ks();*/
             
-            directLight += ambient + diffuse;
+            directLight += diffuse;
         } else {
             // shadow
             //directLight = Vec3Df(1, 1, 0);
