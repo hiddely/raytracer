@@ -17,6 +17,7 @@ Vec3Df testRayOrigin;
 Vec3Df testRayDestination;
 Vec3Df moveLightRayOrigin; 
 Vec3Df moveLightRayDestination;
+Vec3Df moveLightDirection = Vec3Df(0.1, 0, 0);
 double red;
 double green;
 double blue;
@@ -296,21 +297,37 @@ void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3
 	switch (t) {
 	case 'L': selectedLight = MyLightPositions.size() - 1; break;
 	case 'f': selectedLight = (selectedLight + 1) % MyLightPositions.size(); break;
-	case 'w': offset = Vec3Df(0, 0, 0.1); moveLight(offset, "z"); red = 0; green = 0; blue = 1; break;
-	case 's': offset = Vec3Df(0, 0, -0.1); moveLight(offset, "z"); red = 0; green = 0; blue = 1; break;
-	case 'a': offset = Vec3Df(0, 0.1, 0); moveLight(offset, "y"); red = 0; green = 1; blue = 0; break;
-	case 'd': offset = Vec3Df(0, -0.1, 0); moveLight(offset, "y"); red = 0; green = 1; blue = 0; break;
-	case 'q': offset = Vec3Df(0.1, 0, 0); moveLight(offset, "x"); red = 1; green = 0; blue = 0; break;
-	case 'e': offset = Vec3Df(-0.1, 0, 0); moveLight(offset, "x"); red = 1; green = 0; blue = 0; break;
+	case 'x': {
+		moveLightDirection[0] = 0.1;
+		moveLightDirection[1] = 0;
+		moveLightDirection[2] = 0;
+		red = 0; green = 0; blue = 1;
+		setMoveLightRay("x"); break;
+	}
+	case 'y': {
+		moveLightDirection[0] = 0;
+		moveLightDirection[1] = 0.1;
+		moveLightDirection[2] = 0;
+		red = 1; green = 0; blue = 0;
+		setMoveLightRay("y"); break;
+	}
+	case 'z': { 
+		moveLightDirection[0] = 0;
+		moveLightDirection[1] = 0;
+		moveLightDirection[2] = 0.1;
+		red = 0; green = 1; blue = 0;
+		setMoveLightRay("z"); break;
+	}
+	case 'w': MyLightPositions[selectedLight] = MyLightPositions[selectedLight] + moveLightDirection; break;
+	case 's': MyLightPositions[selectedLight] = MyLightPositions[selectedLight] + moveLightDirection * -1; break;
 	}	
-	
 	std::cout<<t<<" pressed! The mouse was in location "<<x<<","<<y<<"!"<<std::endl;	
 }
 
-void moveLight(Vec3Df v, std::string moveDir) {
+void setMoveLightRay(std::string dir) {
 	Vec3Df lastLight = MyLightPositions[selectedLight];
-	MyLightPositions[selectedLight] = lastLight + v;
-	moveLightRayOrigin = v * 100 + lastLight;
-	moveLightRayDestination = v * -100 + lastLight;
-	std::cout << "Moving lightsource along "<< moveDir << " axis. " << std::endl;
+	moveLightRayOrigin = moveLightDirection * 100 + lastLight;
+	moveLightRayDestination = moveLightDirection * -100 + lastLight;
+	
+	std::cout << "Move lightsource along "<< dir << " axis by pressing w and s." << std::endl;
 }

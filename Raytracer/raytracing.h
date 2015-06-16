@@ -43,6 +43,6 @@ bool equals(const Vec3Df & one, const Vec3Df & two);
 void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w);
 Material getTriangleMaterial(const unsigned int triangleIndex);
 
-void moveLight(Vec3Df t, std::string moveDir);
+void setMoveLightRay(std::string dir);
 
 #endif
