@@ -15,7 +15,12 @@
 //a simple debug drawing. A ray 
 Vec3Df testRayOrigin;
 Vec3Df testRayDestination;
-
+Vec3Df moveLightRayOrigin; 
+Vec3Df moveLightRayDestination;
+double red;
+double green;
+double blue;
+int selectedLight = 0;
 
 //use this function for any preprocessing of the mesh.
 void init()
@@ -235,6 +240,12 @@ void yourDebugDraw()
 	glColor3f(0,0,1);
 	glVertex3f(testRayDestination[0], testRayDestination[1], testRayDestination[2]);
 	glEnd();
+	glBegin(GL_LINES);
+	glColor3f(red, green, blue);
+	glVertex3f(moveLightRayOrigin[0], moveLightRayOrigin[1], moveLightRayOrigin[2]);
+	glColor3f(red, green, blue);
+	glVertex3f(moveLightRayDestination[0], moveLightRayDestination[1], moveLightRayDestination[2]);
+	glEnd();
 	glPointSize(10);
 	glBegin(GL_POINTS);
 	glVertex3fv(MyLightPositions[0].pointer());
@@ -275,11 +286,26 @@ void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3
 	//try it: Press a key, move the camera, see the ray that was launched as a line.
 	testRayOrigin=rayOrigin;	
 	testRayDestination=rayDestination;
+	Vec3Df offset;
 	
-	// do here, whatever you want with the keyboard input t.
-	
-	//...
-	
+	switch (t) {
+	case 'L': selectedLight = MyLightPositions.size() - 1; break;
+	case 'f': selectedLight = (selectedLight + 1) % MyLightPositions.size(); break;
+	case 'w': offset = Vec3Df(0, 0, 0.1); moveLight(offset, "z"); red = 0; green = 0; blue = 1; break;
+	case 's': offset = Vec3Df(0, 0, -0.1); moveLight(offset, "z"); red = 0; green = 0; blue = 1; break;
+	case 'a': offset = Vec3Df(0, 0.1, 0); moveLight(offset, "y"); red = 0; green = 1; blue = 0; break;
+	case 'd': offset = Vec3Df(0, -0.1, 0); moveLight(offset, "y"); red = 0; green = 1; blue = 0; break;
+	case 'q': offset = Vec3Df(0.1, 0, 0); moveLight(offset, "x"); red = 1; green = 0; blue = 0; break;
+	case 'e': offset = Vec3Df(-0.1, 0, 0); moveLight(offset, "x"); red = 1; green = 0; blue = 0; break;
+	}	
 	
 	std::cout<<t<<" pressed! The mouse was in location "<<x<<","<<y<<"!"<<std::endl;	
+}
+
+void moveLight(Vec3Df v, std::string moveDir) {
+	Vec3Df lastLight = MyLightPositions[selectedLight];
+	MyLightPositions[selectedLight] = lastLight + v;
+	moveLightRayOrigin = v * 100 + lastLight;
+	moveLightRayDestination = v * -100 + lastLight;
+	std::cout << "Moving lightsource along "<< moveDir << " axis. " << std::endl;
 }
