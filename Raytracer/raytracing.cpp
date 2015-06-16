@@ -108,7 +108,7 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
  **/
 Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit) {
     
-    Vec3Df directLight;
+    Vec3Df directLight = Vec3Df(0, 0, 0);
     
     float lightintensity_ambient = 1.1;
     
@@ -143,14 +143,19 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             
             Vec3Df diffuse = lightintensity_ambient * powf(costheta, 1) * m.Kd();
         
-            std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
+            //std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
 
+            // specular
+            /*float n = 1;
+            Vec3Df link = ((Vec3Df(-0.00466308, 0.00466308, 3.99) - hit) - direction);
+            link.normalize();
+            Vec3Df specular = lightintensity_ambient * powf(link.dotProduct(link, surfaceNormal), n) * m.Ks();*/
             
-            directLight = diffuse;
+            directLight += ambient + diffuse;
         } else {
             // shadow
             //directLight = Vec3Df(1, 1, 0);
-            directLight = getTriangleColor(triangleIndex) - Vec3Df(0.2, 0.2, 0.2);
+            directLight += getTriangleColor(triangleIndex) - Vec3Df(0.2, 0.2, 0.2);
         }
 
     }
