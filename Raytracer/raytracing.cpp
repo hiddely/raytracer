@@ -39,9 +39,22 @@ void init()
 //return the color of your pixel.
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
+    int i = intersect(origin, dest);
+    if (i != -1) {
+        // we have a hit
+        return shade(0, i);
+    }
+    
+	return Vec3Df(0, 0, 0);
+}
+
+/**
+ Checks if there is an intersection between the ray and the triangles, returns closest triangleIndex
+ **/
+int intersect(const Vec3Df & origin, const Vec3Df & dest) {
     std::vector<Vertex> vertices = MyMesh.vertices;
     float lastDistance = 100000000; // big number
-    Vec3Df lastColor = Vec3Df(0, 0, 0);
+    int lastTriangleIndex = -1; // -1 means no hit
     for(std::vector<int>::size_type i = 0; i != MyMesh.triangles.size(); i++) {
         /* std::cout << *it; ... */
         // single triangle
@@ -49,7 +62,6 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
         Vertex v0 = vertices[triangle.v[0]];
         Vertex v1 = vertices[triangle.v[1]];
         Vertex v2 = vertices[triangle.v[2]];
-
         
         // d in n
         
@@ -77,7 +89,7 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
                 // we are inside triangle
                 
                 if (lastDistance > t) {
-                    lastColor = getTriangleColor(i);
+                    lastTriangleIndex = i;
                     lastDistance = t;
                 }
             }
@@ -89,9 +101,34 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
         
     }
     
-	return lastColor;
+    return lastTriangleIndex;
 }
 
+/**
+ Calculates shading color
+ **/
+Vec3Df shade(unsigned int level, const unsigned int triangleIndex) {
+    
+    /*Vec3Df directLight;
+    
+    // for each light
+    for(std::vector<int>::size_type i = 0; i != MyLightPositions.size(); i++) {
+        Vec3Df lightsource = MyLightPositions[i];
+        
+        
+    }*/
+    
+    return getTriangleColor(triangleIndex);
+
+    //return directLight;
+}
+
+Vec3Df getTriangleColor(const unsigned int triangleIndex) {
+    Material m = MyMesh.materials[MyMesh.triangleMaterials[triangleIndex]];
+    
+    // for now return ambient value
+    return m.Kd();
+}
 
 // calculates the surface normal vector n
 Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex & v2) {
@@ -100,13 +137,6 @@ Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex 
     product.normalize();
     
     return product;
-}
-
-Vec3Df getTriangleColor(const unsigned int triangleIndex) {
-    Material m = MyMesh.materials[MyMesh.triangleMaterials[triangleIndex]];
-    
-    // for now return ambient value
-    return m.Kd();
 }
 
 void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w)
