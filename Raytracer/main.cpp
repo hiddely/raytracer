@@ -218,7 +218,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 'r':
 	{
 		//Pressing r will launch the raytracing.
-		cout<<"Raytracing"<<endl;
+		std::cout<<"Raytracing"<<endl;
 		time_t startTime = time(0);
 
 		//Setup an image with the size of the current image.
@@ -260,7 +260,7 @@ void keyboard(unsigned char key, int x, int y)
 				result.setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
 			}
 		}
-		cout << "\n" << endl;
+		std::cout << "\n" << endl;
 
 		result.writeImage(IMAGE_PATH);
 		time_t endTime = time(0);
