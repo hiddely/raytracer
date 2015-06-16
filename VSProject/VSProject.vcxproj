@@ -70,7 +70,7 @@
     <ClInclude Include="..\Raytracer\imageWriter.h" />
     <ClInclude Include="..\Raytracer\matrix.h" />
     <ClInclude Include="..\Raytracer\mesh.h" />
-    <ClInclude Include="..\Raytracer\paths.h.example.h" />
+    <ClInclude Include="..\Raytracer\paths.h" />
     <ClInclude Include="..\Raytracer\raytracing.h" />
     <ClInclude Include="..\Raytracer\traqueboule.h" />
     <ClInclude Include="..\Raytracer\Vec3D.h" />

@@ -34,6 +34,9 @@ void yourDebugDraw();
 //want keyboard interaction? Here it is...
 void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3Df & rayDestination);
 
+void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, Vec3Df & hit);
+Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit);
+
 Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex & v2);
 Vec3Df getTriangleColor(const unsigned int triangleIndex);
 bool equals(const Vec3Df & one, const Vec3Df & two);

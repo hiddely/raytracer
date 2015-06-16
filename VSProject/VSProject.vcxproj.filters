@@ -24,9 +24,6 @@
     <ClInclude Include="..\Raytracer\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Raytracer\paths.h.example.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Raytracer\raytracing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Raytracer\Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raytracer\paths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

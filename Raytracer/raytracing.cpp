@@ -39,26 +39,36 @@ void init()
 //return the color of your pixel.
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
-    //std::vector<Triangle> triangles = MyMesh.triangles;
-    //std::cout<<"Nr "<<triangles.size()<<"\n";
+    int triangleIndex;
+    Vec3Df hit;
+    intersect(origin, dest, triangleIndex, hit);
+    if (triangleIndex != -1) {
+        // we have a hit
+        return shade(0, triangleIndex, hit);
+    }
+    
+	return Vec3Df(0, 0, 0);
+}
+
+/**
+ Checks if there is an intersection between the ray and the triangles, returns closest triangleIndex
+ **/
+void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, Vec3Df & hit) {
     std::vector<Vertex> vertices = MyMesh.vertices;
+    float lastDistance = 100000000; // big number
+    triangleIndex = -1; // -1 means no hit
     for(std::vector<int>::size_type i = 0; i != MyMesh.triangles.size(); i++) {
-		float progress = i / MyMesh.triangles.size();
-		//cout << progress <<endl;
         /* std::cout << *it; ... */
         // single triangle
         Triangle triangle = MyMesh.triangles[i];
         Vertex v0 = vertices[triangle.v[0]];
         Vertex v1 = vertices[triangle.v[1]];
         Vertex v2 = vertices[triangle.v[2]];
-
         
         // d in n
         
         Vec3Df normal = surfaceNormalTriangle(v0, v1, v2);
-        if (normal.dotProduct(normal, v0.p) < 0) {
-            normal = -1 * normal;
-        }
+
         float ndotd = normal.dotProduct(normal, dest);
         
         // calculate if our ray has a non-zero dot product with the normal
@@ -77,8 +87,11 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
             
             if (!(a < 0 || a > 1 || b < 0 || a+b > 1)) {
                 // we are inside triangle
-                
-                return getTriangleColor(i);
+
+                if (lastDistance > t) {
+                    triangleIndex = i;
+                    lastDistance = t;
+                }
             }
             
             //std::cout << "T:"<<t<<"\n";
@@ -87,18 +100,33 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
         }
         
     }
-    
-	return Vec3Df(0,0,0);
 }
 
+/**
+ Calculates shading color
+ **/
+Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit) {
+    
+    Triangle triangle = MyMesh.triangles[triangleIndex];
+    Vertex v0 = MyMesh.vertices[triangle.v[0]];
+    Vertex v1 = MyMesh.vertices[triangle.v[1]];
+    Vertex v2 = MyMesh.vertices[triangle.v[2]];
+    
+    Vec3Df surfaceNormal = surfaceNormalTriangle(v0, v1, v2);
+    
+    
+    /*Vec3Df directLight;
+    
+    // for each light
+    for(std::vector<int>::size_type i = 0; i != MyLightPositions.size(); i++) {
+        Vec3Df lightsource = MyLightPositions[i];
+        
+        
+    }*/
+    
+    return getTriangleColor(triangleIndex);
 
-// calculates the surface normal vector n
-Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex & v2) {
-    
-    Vec3Df product = v0.p.crossProduct((v0.p-v2.p), (v1.p-v2.p));
-    product.normalize();
-    
-    return product;
+    //return directLight;
 }
 
 Vec3Df getTriangleColor(const unsigned int triangleIndex) {
@@ -106,6 +134,19 @@ Vec3Df getTriangleColor(const unsigned int triangleIndex) {
     
     // for now return ambient value
     return m.Kd();
+}
+
+// calculates the surface normal vector n
+Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex & v2) {
+    
+    Vec3Df product = v0.p.crossProduct((v0.p-v2.p), (v1.p-v2.p));
+    product.normalize();
+    
+    if (product.dotProduct(product, v0.p) < 0) {
+        product = -1 * product;
+    }
+    
+    return product;
 }
 
 void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w)

@@ -238,7 +238,6 @@ void keyboard(unsigned char key, int x, int y)
 		produceRay(WindowSize_X-1,0, &origin10, &dest10);
 		produceRay(WindowSize_X-1,WindowSize_Y-1, &origin11, &dest11);
 
-		
 		for (double y = 0; y < WindowSize_Y; ++y) {
 			double perc = round((y / WindowSize_Y) * 100);
 			std::cout << "[Raytracing with "<< WindowSize_Y << " pixels running]  [" << perc << "%]" << '\r' << std::flush;
