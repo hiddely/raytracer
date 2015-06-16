@@ -39,13 +39,15 @@ void init()
 //return the color of your pixel.
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
-    std::vector<Triangle> triangles = MyMesh.triangles;
+    //std::vector<Triangle> triangles = MyMesh.triangles;
     //std::cout<<"Nr "<<triangles.size()<<"\n";
     std::vector<Vertex> vertices = MyMesh.vertices;
-    for(std::vector<int>::size_type i = 0; i != triangles.size(); i++) {
+    for(std::vector<int>::size_type i = 0; i != MyMesh.triangles.size(); i++) {
+		float progress = i / MyMesh.triangles.size();
+		//cout << progress <<endl;
         /* std::cout << *it; ... */
         // single triangle
-        Triangle triangle = triangles[i];
+        Triangle triangle = MyMesh.triangles[i];
         Vertex v0 = vertices[triangle.v[0]];
         Vertex v1 = vertices[triangle.v[1]];
         Vertex v2 = vertices[triangle.v[2]];

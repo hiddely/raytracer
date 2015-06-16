@@ -13,6 +13,7 @@
 #include "traqueboule.h"
 #include "imageWriter.h"
 #include "paths.h"
+#include <ctime>
 
 
 //This is the main application
@@ -33,8 +34,8 @@ std::vector<Vec3Df> MyLightPositions;
 //Main mesh 
 Mesh MyMesh;
 
-unsigned int WindowSize_X = 160;  // resolution X
-unsigned int WindowSize_Y = 160;  // resolution Y
+unsigned int WindowSize_X = 800;  // resolution X
+unsigned int WindowSize_Y = 800;  // resolution Y
 
 
 
@@ -218,7 +219,7 @@ void keyboard(unsigned char key, int x, int y)
 	{
 		//Pressing r will launch the raytracing.
 		cout<<"Raytracing"<<endl;
-				
+		time_t startTime = time(0);
 
 		//Setup an image with the size of the current image.
 		Image result(WindowSize_X,WindowSize_Y);
@@ -238,28 +239,33 @@ void keyboard(unsigned char key, int x, int y)
 		produceRay(WindowSize_X-1,WindowSize_Y-1, &origin11, &dest11);
 
 		
-		for (unsigned int y=0; y<WindowSize_Y;++y)
-			for (unsigned int x=0; x<WindowSize_X;++x)
+		for (double y = 0; y < WindowSize_Y; ++y) {
+			double perc = round((y / WindowSize_Y) * 100);
+			std::cout << "[Raytracing with "<< WindowSize_Y << " pixels running]  [" << perc << "%]" << '\r' << std::flush;
+			//std::cout << WindowSize_Y << std::endl;
+			for (unsigned int x = 0; x < WindowSize_X; ++x)
 			{
 				//produce the rays for each pixel, by interpolating 
 				//the four rays of the frustum corners.
-				float xscale=1.0f-float(x)/(WindowSize_X-1);
-				float yscale=1.0f-float(y)/(WindowSize_Y-1);
+				float xscale = 1.0f - float(x) / (WindowSize_X - 1);
+				float yscale = 1.0f - float(y) / (WindowSize_Y - 1);
 
-				origin=yscale*(xscale*origin00+(1-xscale)*origin10)+
-					(1-yscale)*(xscale*origin01+(1-xscale)*origin11);
-				dest=yscale*(xscale*dest00+(1-xscale)*dest10)+
-					(1-yscale)*(xscale*dest01+(1-xscale)*dest11);
+				origin = yscale*(xscale*origin00 + (1 - xscale)*origin10) +
+					(1 - yscale)*(xscale*origin01 + (1 - xscale)*origin11);
+				dest = yscale*(xscale*dest00 + (1 - xscale)*dest10) +
+					(1 - yscale)*(xscale*dest01 + (1 - xscale)*dest11);
 
 				//launch raytracing for the given ray.
 				Vec3Df rgb = performRayTracing(origin, dest);
 				//store the result in an image 
-				result.setPixel(x,y, RGBValue(rgb[0], rgb[1], rgb[2]));
+				result.setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
 			}
+		}
+		cout << "\n" << endl;
 
 		result.writeImage(IMAGE_PATH);
-        
-        //std::cout<<"Traced in "<< <<" seconds.";
+		time_t endTime = time(0);
+		std::cout << "The tracing took " << endTime - startTime << " seconds." << std::endl;
 		break;
 	}
 	case 27:     // touche ESC

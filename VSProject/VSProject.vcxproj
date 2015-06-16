@@ -44,9 +44,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Cas\Documents\freeglut-MSVC-3.0.0-1.mp\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Cas\Documents\freeglut-MSVC-3.0.0-1.mp\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -82,11 +85,6 @@
     <None Include="..\Raytracer\cube.mtl" />
     <None Include="..\Raytracer\dodgeColorTest.mtl" />
     <None Include="..\Raytracer\HumanMesh.mtl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\Raytracer\cube.obj" />
-    <Object Include="..\Raytracer\dodgeColorTest.obj" />
-    <Object Include="..\Raytracer\HumanMesh.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

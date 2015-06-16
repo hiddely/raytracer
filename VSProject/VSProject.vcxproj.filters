@@ -62,15 +62,4 @@
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\Raytracer\cube.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
-    <Object Include="..\Raytracer\dodgeColorTest.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
-    <Object Include="..\Raytracer\HumanMesh.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
-  </ItemGroup>
 </Project>
