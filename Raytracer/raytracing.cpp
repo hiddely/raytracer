@@ -91,6 +91,7 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
                 if (lastDistance > t) {
                     triangleIndex = i;
                     lastDistance = t;
+                    hit = p;
                 }
             }
             
@@ -107,33 +108,67 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
  **/
 Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit) {
     
-    Triangle triangle = MyMesh.triangles[triangleIndex];
-    Vertex v0 = MyMesh.vertices[triangle.v[0]];
-    Vertex v1 = MyMesh.vertices[triangle.v[1]];
-    Vertex v2 = MyMesh.vertices[triangle.v[2]];
+    Vec3Df directLight;
     
-    Vec3Df surfaceNormal = surfaceNormalTriangle(v0, v1, v2);
-    
-    
-    /*Vec3Df directLight;
+    float lightintensity_ambient = 1.1;
     
     // for each light
     for(std::vector<int>::size_type i = 0; i != MyLightPositions.size(); i++) {
         Vec3Df lightsource = MyLightPositions[i];
         
+        Vec3Df direction = hit - lightsource;
         
-    }*/
-    
-    return getTriangleColor(triangleIndex);
+        int closestTriangleIndex;
+        Vec3Df closestHit;
+        intersect(lightsource, direction, closestTriangleIndex, closestHit);
+        
+        if (triangleIndex == closestTriangleIndex) {
+            // let there be light
+            
+            Material m = getTriangleMaterial(triangleIndex);
+            
+            // calculate ambient term
+            Vec3Df ambient = lightintensity_ambient * m.Ka();
+            
+            // calculate diffuse term
+            
+            Triangle triangle = MyMesh.triangles[triangleIndex];
+            Vertex v0 = MyMesh.vertices[triangle.v[0]];
+            Vertex v1 = MyMesh.vertices[triangle.v[1]];
+            Vertex v2 = MyMesh.vertices[triangle.v[2]];
+            
+            Vec3Df surfaceNormal = -1 * surfaceNormalTriangle(v0, v1, v2);
+            
+            float costheta = surfaceNormal.dotProduct(surfaceNormal, direction) / direction.getLength();
+            
+            Vec3Df diffuse = lightintensity_ambient * powf(costheta, 1) * m.Kd();
+        
+            std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
 
-    //return directLight;
+            
+            directLight = diffuse;
+        } else {
+            // shadow
+            //directLight = Vec3Df(1, 1, 0);
+            directLight = getTriangleColor(triangleIndex) - Vec3Df(0.2, 0.2, 0.2);
+        }
+
+    }
+    
+    //return getTriangleColor(triangleIndex);
+
+    return directLight;
 }
 
 Vec3Df getTriangleColor(const unsigned int triangleIndex) {
     Material m = MyMesh.materials[MyMesh.triangleMaterials[triangleIndex]];
     
-    // for now return ambient value
+    // for now return diffuse value
     return m.Kd();
+}
+
+Material getTriangleMaterial(const unsigned int triangleIndex) {
+    return MyMesh.materials[MyMesh.triangleMaterials[triangleIndex]];
 }
 
 // calculates the surface normal vector n

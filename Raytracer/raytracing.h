@@ -41,5 +41,6 @@ Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex 
 Vec3Df getTriangleColor(const unsigned int triangleIndex);
 bool equals(const Vec3Df & one, const Vec3Df & two);
 void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w);
+Material getTriangleMaterial(const unsigned int triangleIndex);
 
 #endif
