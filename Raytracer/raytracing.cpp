@@ -39,13 +39,13 @@ void init()
 //return the color of your pixel.
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
-    std::vector<Triangle> triangles = MyMesh.triangles;
-    //std::cout<<"Nr "<<triangles.size()<<"\n";
     std::vector<Vertex> vertices = MyMesh.vertices;
-    for(std::vector<int>::size_type i = 0; i != triangles.size(); i++) {
+    float lastDistance = 100000000; // big number
+    Vec3Df lastColor = Vec3Df(0, 0, 0);
+    for(std::vector<int>::size_type i = 0; i != MyMesh.triangles.size(); i++) {
         /* std::cout << *it; ... */
         // single triangle
-        Triangle triangle = triangles[i];
+        Triangle triangle = MyMesh.triangles[i];
         Vertex v0 = vertices[triangle.v[0]];
         Vertex v1 = vertices[triangle.v[1]];
         Vertex v2 = vertices[triangle.v[2]];
@@ -76,7 +76,10 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
             if (!(a < 0 || a > 1 || b < 0 || a+b > 1)) {
                 // we are inside triangle
                 
-                return getTriangleColor(i);
+                if (lastDistance > t) {
+                    lastColor = getTriangleColor(i);
+                    lastDistance = t;
+                }
             }
             
             //std::cout << "T:"<<t<<"\n";
@@ -86,7 +89,7 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
         
     }
     
-	return Vec3Df(0,0,0);
+	return lastColor;
 }
 
 
