@@ -172,8 +172,8 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             //std::cout << "Pwo: " << powf(link.dotProduct(link, surfaceNormal), n) << std::endl;
             
             // compute reflected ray
-            Vec3Df reflectedColor;
-            Vec3Df reflectedRay = hit - ( (2 * hit.dotProduct(surfaceNormal, hit) ) * surfaceNormal);
+            Vec3Df reflectedColor = Vec3Df(0, 0, 0);
+            Vec3Df reflectedRay = direction - ( (2 * direction.dotProduct(surfaceNormal, direction) ) * surfaceNormal);
             int reflectedTriangleIndex;
             Vec3Df reflectedHit;
             intersect(hit, reflectedRay, reflectedTriangleIndex, reflectedHit);
@@ -182,7 +182,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
                 reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
             }
             
-            directLight += ambient + diffuse + specular + reflectedColor;
+            directLight += ambient + diffuse + reflectedColor;
         } else {
             // shadow
             //directLight = Vec3Df(1, 1, 0);
