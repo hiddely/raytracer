@@ -23,7 +23,7 @@ double green;
 double blue;
 int selectedLight = 0;
 Vec3Df cameraOrigin;
-int maxLevel = 2;
+int maxLevel = 1;
 
 //use this function for any preprocessing of the mesh.
 void init()
@@ -117,6 +117,10 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
  **/
 Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit) {
     
+    if (level > maxLevel) {
+        return Vec3Df(0, 0, 0);
+    }
+    
     Vec3Df directLight = Vec3Df(0, 0, 0);
     
     float lightintensity_ambient = 1.1;
@@ -168,10 +172,17 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             //std::cout << "Pwo: " << powf(link.dotProduct(link, surfaceNormal), n) << std::endl;
             
             // compute reflected ray
+            Vec3Df reflectedColor;
+            Vec3Df reflectedRay = hit - ( (2 * hit.dotProduct(surfaceNormal, hit) ) * surfaceNormal);
+            int reflectedTriangleIndex;
+            Vec3Df reflectedHit;
+            intersect(hit, reflectedRay, reflectedTriangleIndex, reflectedHit);
+            if (reflectedTriangleIndex != -1) {
+                // we have a hit
+                reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
+            }
             
-            
-            
-            directLight += ambient + diffuse + specular;
+            directLight += ambient + diffuse + specular + reflectedColor;
         } else {
             // shadow
             //directLight = Vec3Df(1, 1, 0);
