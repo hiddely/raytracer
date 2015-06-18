@@ -145,7 +145,9 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             
             Vec3Df surfaceNormal = -1 * surfaceNormalTriangle(v0, v1, v2);
             
-            float costheta = surfaceNormal.dotProduct(surfaceNormal, direction) / direction.getLength();
+            direction.normalize();
+            
+            float costheta = surfaceNormal.dotProduct(surfaceNormal, direction);
             
             Vec3Df diffuse = lightintensity_ambient * powf(costheta, 1) * m.Kd();
         
