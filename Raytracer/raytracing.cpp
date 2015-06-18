@@ -22,6 +22,8 @@ double red;
 double green;
 double blue;
 int selectedLight = 0;
+Vec3Df cameraOrigin;
+int maxLevel = 2;
 
 //use this function for any preprocessing of the mesh.
 void init()
@@ -45,6 +47,7 @@ void init()
 //return the color of your pixel.
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
 {
+    cameraOrigin = origin;
     int triangleIndex;
     Vec3Df hit;
     intersect(origin, dest, triangleIndex, hit);
@@ -117,6 +120,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
     Vec3Df directLight = Vec3Df(0, 0, 0);
     
     float lightintensity_ambient = 1.1;
+    float lightintensity_specular = 0.8;
     
     // for each light
     for(std::vector<int>::size_type i = 0; i != MyLightPositions.size(); i++) {
@@ -131,7 +135,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
         Material m = getTriangleMaterial(triangleIndex);
         
         // calculate ambient term
-        Vec3Df ambient = 0.2 * m.Kd();
+        Vec3Df ambient = 0.5 * m.Kd();
         
         if (triangleIndex == closestTriangleIndex) {
             // let there be light
@@ -150,17 +154,24 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             
             float costheta = surfaceNormal.dotProduct(surfaceNormal, direction);
             
+            // diffuse
             Vec3Df diffuse = lightintensity_ambient * fabs(powf(costheta, 1)) * m.Kd();
         
             //std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
 
             // specular
-            /*float n = 1;
-            Vec3Df link = ((Vec3Df(-0.00466308, 0.00466308, 3.99) - hit) - direction);
+            float n = 8;
+            Vec3Df link = ((cameraOrigin - hit) - direction);
             link.normalize();
-            Vec3Df specular = lightintensity_ambient * powf(link.dotProduct(link, surfaceNormal), n) * m.Ks();*/
+            Vec3Df specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, surfaceNormal)), n) * m.Ks();
             
-            directLight += ambient + diffuse;
+            //std::cout << "Pwo: " << powf(link.dotProduct(link, surfaceNormal), n) << std::endl;
+            
+            // compute reflected ray
+            
+            
+            
+            directLight += ambient + diffuse + specular;
         } else {
             // shadow
             //directLight = Vec3Df(1, 1, 0);
