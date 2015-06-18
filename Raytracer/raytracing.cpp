@@ -130,11 +130,12 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
         
         Material m = getTriangleMaterial(triangleIndex);
         
+        // calculate ambient term
+        Vec3Df ambient = 0.2 * m.Kd();
+        
         if (triangleIndex == closestTriangleIndex) {
             // let there be light
-            
-            // calculate ambient term
-            Vec3Df ambient = lightintensity_ambient * m.Ka();
+        
             
             // calculate diffuse term
             
@@ -149,7 +150,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             
             float costheta = surfaceNormal.dotProduct(surfaceNormal, direction);
             
-            Vec3Df diffuse = lightintensity_ambient * powf(costheta, 1) * m.Kd();
+            Vec3Df diffuse = lightintensity_ambient * fabs(powf(costheta, 1)) * m.Kd();
         
             //std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
 
@@ -163,7 +164,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
         } else {
             // shadow
             //directLight = Vec3Df(1, 1, 0);
-            directLight += m.Ka(); // just show ambient
+            directLight += ambient; // just show ambient
         }
 
     }
