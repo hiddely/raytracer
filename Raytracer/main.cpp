@@ -14,6 +14,9 @@
 #include "imageWriter.h"
 #include "paths.h"
 #include <ctime>
+#include <thread>
+#include <atomic>
+#include <future>
 
 
 //This is the main application
@@ -238,28 +241,81 @@ void keyboard(unsigned char key, int x, int y)
 		produceRay(WindowSize_X-1,0, &origin10, &dest10);
 		produceRay(WindowSize_X-1,WindowSize_Y-1, &origin11, &dest11);
 
-		for (double y = 0; y < WindowSize_Y; ++y) {
-			double perc = round((y / WindowSize_Y) * 100);
-			std::cout << "[Raytracing with "<< WindowSize_Y << " pixels running]  [" << perc << "%]" << '\r' << std::flush;
-			//std::cout << WindowSize_Y << std::endl;
-			for (unsigned int x = 0; x < WindowSize_X; ++x)
-			{
-				//produce the rays for each pixel, by interpolating 
-				//the four rays of the frustum corners.
-				float xscale = 1.0f - float(x) / (WindowSize_X - 1);
-				float yscale = 1.0f - float(y) / (WindowSize_Y - 1);
+		// True for multithreaded tracing
+		boolean MULTITHREAD = true;
 
-				origin = yscale*(xscale*origin00 + (1 - xscale)*origin10) +
-					(1 - yscale)*(xscale*origin01 + (1 - xscale)*origin11);
-				dest = yscale*(xscale*dest00 + (1 - xscale)*dest10) +
-					(1 - yscale)*(xscale*dest01 + (1 - xscale)*dest11);
+		if (MULTITHREAD){
+			std::size_t max = WindowSize_X * WindowSize_Y;
+			std::size_t cores = std::thread::hardware_concurrency();
+			std::cout << "max: " << max << ", cores: " << cores << "\n";
 
-				//launch raytracing for the given ray.
-				Vec3Df rgb = performRayTracing(origin, dest);
-				//store the result in an image 
-				result.setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
+			volatile std::atomic<std::size_t> count(0);
+			std::vector<std::future<void>> future_vector;
+
+			boolean done = true;
+
+
+
+			while (done){
+				cores--;
+				future_vector.emplace_back(
+					std::async([=, &done, &origin, &dest, &origin00, &origin01, &origin10, &origin11, &dest00, &dest01, &dest10, &dest11, &result, &count]()
+				{
+					while (true)
+					{
+						int index = count++;
+						if (index > max){
+							done = false;
+							break;
+						}
+						int x = index % WindowSize_X;
+						int y = index / WindowSize_X;
+
+						std::cout << "index: " << index << ", x: " << x << ", y: " << y << "\n";
+
+						float xscale = 1.0f - float(x) / (WindowSize_X - 1);
+						float yscale = 1.0f - float(y) / (WindowSize_Y - 1);
+
+						origin = yscale*(xscale*origin00 + (1 - xscale)*origin10) +
+
+							(1 - yscale)*(xscale*origin01 + (1 - xscale)*origin11);
+						dest = yscale*(xscale*dest00 + (1 - xscale)*dest10) +
+							(1 - yscale)*(xscale*dest01 + (1 - xscale)*dest11);
+
+						//launch raytracing for the given ray.
+						Vec3Df rgb = performRayTracing(origin, dest);
+						//store the result in an image
+						result.setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
+					}
+				}));
 			}
 		}
+		else{
+
+			for (double y = 0; y < WindowSize_Y; ++y) {
+				double perc = round((y / WindowSize_Y) * 100);
+				std::cout << "[Raytracing with " << WindowSize_Y << " pixels running]  [" << perc << "%]" << '\r' << std::flush;
+				//std::cout << WindowSize_Y << std::endl;
+				for (unsigned int x = 0; x < WindowSize_X; ++x)
+				{
+					//produce the rays for each pixel, by interpolating 
+					//the four rays of the frustum corners.
+					float xscale = 1.0f - float(x) / (WindowSize_X - 1);
+					float yscale = 1.0f - float(y) / (WindowSize_Y - 1);
+
+					origin = yscale*(xscale*origin00 + (1 - xscale)*origin10) +
+						(1 - yscale)*(xscale*origin01 + (1 - xscale)*origin11);
+					dest = yscale*(xscale*dest00 + (1 - xscale)*dest10) +
+						(1 - yscale)*(xscale*dest01 + (1 - xscale)*dest11);
+
+					//launch raytracing for the given ray.
+					Vec3Df rgb = performRayTracing(origin, dest);
+					//store the result in an image 
+					result.setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
+				}
+			}
+		}
+
 		std::cout << "\n" << endl;
 
 		result.writeImage(IMAGE_PATH);
