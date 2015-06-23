@@ -110,6 +110,8 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
         }
         
     }
+    
+    //std::cout << "Distance: " << lastDistance << std::endl;
 }
 
 /**
@@ -173,16 +175,23 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             
             // compute reflected ray
             Vec3Df reflectedColor = Vec3Df(0, 0, 0);
-            Vec3Df reflectedRay = direction - ( (2 * direction.dotProduct(surfaceNormal, direction) ) * surfaceNormal);
+            hit.normalize();
+            Vec3Df reflectedRay = hit - ( (2 * hit.dotProduct(surfaceNormal, hit) ) * surfaceNormal);
+            const double ERR = 1e-12;
+            reflectedRay = reflectedRay + (surfaceNormal*ERR);
             int reflectedTriangleIndex;
             Vec3Df reflectedHit;
             if (m.Ni() == 0.000000) {
                 // reflects
-                intersect(hit, reflectedRay, reflectedTriangleIndex, reflectedHit);
+                intersect((cameraOrigin - hit), reflectedRay, reflectedTriangleIndex, reflectedHit);
+                
                 if (reflectedTriangleIndex != -1) {
                     // we have a hit
                     reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
                 }
+                
+                std::cout << "Calculating color: " << reflectedColor << std::endl;
+
             }
             
             directLight += ambient + diffuse + specular + reflectedColor;
