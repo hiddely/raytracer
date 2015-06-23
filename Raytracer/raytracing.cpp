@@ -176,13 +176,17 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             Vec3Df reflectedRay = direction - ( (2 * direction.dotProduct(surfaceNormal, direction) ) * surfaceNormal);
             int reflectedTriangleIndex;
             Vec3Df reflectedHit;
-            intersect(hit, reflectedRay, reflectedTriangleIndex, reflectedHit);
-            if (reflectedTriangleIndex != -1) {
-                // we have a hit
-                reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
+            if (m.Ni() == 0.000000) {
+                // reflects
+                intersect(hit, reflectedRay, reflectedTriangleIndex, reflectedHit);
+                if (reflectedTriangleIndex != -1) {
+                    // we have a hit
+                    reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
+                }
             }
             
-            directLight += ambient + diffuse + reflectedColor;
+            directLight += ambient + diffuse + specular + reflectedColor;
+            
         } else {
             // shadow
             //directLight = Vec3Df(1, 1, 0);
