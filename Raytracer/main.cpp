@@ -242,7 +242,11 @@ void keyboard(unsigned char key, int x, int y)
 		produceRay(WindowSize_X-1,WindowSize_Y-1, &origin11, &dest11);
 
 		// True for multithreaded tracing
-		boolean MULTITHREAD = true;
+#ifdef __APPLE__
+		bool MULTITHREAD = false;
+#else
+        boolean MULTITHREAD = false;
+#endif
 
 		if (MULTITHREAD){
 			std::size_t max = WindowSize_X * WindowSize_Y;
@@ -252,7 +256,7 @@ void keyboard(unsigned char key, int x, int y)
 			volatile std::atomic<std::size_t> count(0);
 			std::vector<std::future<void>> future_vector;
 
-			boolean done = true;
+			bool done = true;
 
 
 
