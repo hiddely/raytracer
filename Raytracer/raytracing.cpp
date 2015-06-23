@@ -140,8 +140,20 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
         
         Material m = getTriangleMaterial(triangleIndex);
         
+        Triangle triangle = MyMesh.triangles[triangleIndex];
+        Vertex v0 = MyMesh.vertices[triangle.v[0]];
+        Vertex v1 = MyMesh.vertices[triangle.v[1]];
+        Vertex v2 = MyMesh.vertices[triangle.v[2]];
+        
+        Vec3Df surfaceNormalP = surfaceNormalTriangle(v0, v1, v2);
+        Vec3Df surfaceNormal = -1 * surfaceNormalP;
+        
         // calculate ambient term
         Vec3Df ambient = 0.5 * m.Kd();
+        Vec3Df diffuse = Vec3Df(0, 0, 0);
+        Vec3Df specular = Vec3Df(0, 0, 0);
+        Vec3Df reflectedColor = Vec3Df(0, 0, 0);
+        Vec3Df refractedColor = Vec3Df(0, 0, 0);
         
         if (triangleIndex == closestTriangleIndex) {
             // let there be light
@@ -149,19 +161,12 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             
             // calculate diffuse term
             
-            Triangle triangle = MyMesh.triangles[triangleIndex];
-            Vertex v0 = MyMesh.vertices[triangle.v[0]];
-            Vertex v1 = MyMesh.vertices[triangle.v[1]];
-            Vertex v2 = MyMesh.vertices[triangle.v[2]];
-            
-            Vec3Df surfaceNormal = -1 * surfaceNormalTriangle(v0, v1, v2);
-            
             direction.normalize();
             
             float costheta = surfaceNormal.dotProduct(surfaceNormal, direction);
             
             // diffuse
-            Vec3Df diffuse = lightintensity_ambient * fabs(powf(costheta, 1)) * m.Kd();
+            diffuse = lightintensity_ambient * fabs(powf(costheta, 1)) * m.Kd();
         
             //std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
 
@@ -169,38 +174,34 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             float n = 8;
             Vec3Df link = ((cameraOrigin - hit) - direction);
             link.normalize();
-            Vec3Df specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, surfaceNormal)), n) * m.Ks();
+            specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, surfaceNormal)), n) * m.Ks();
             
             //std::cout << "Pwo: " << powf(link.dotProduct(link, surfaceNormal), n) << std::endl;
             
-            // compute reflected ray
-            Vec3Df reflectedColor = Vec3Df(0, 0, 0);
-            hit.normalize();
-            Vec3Df reflectedRay = hit - ( (2 * hit.dotProduct(surfaceNormal, hit) ) * surfaceNormal);
-            const double ERR = 1e-12;
-            reflectedRay = reflectedRay + (surfaceNormal*ERR);
-            int reflectedTriangleIndex;
-            Vec3Df reflectedHit;
-            if (m.Ni() == 0.000000) {
-                // reflects
-                intersect((cameraOrigin - hit), reflectedRay, reflectedTriangleIndex, reflectedHit);
-                
-                if (reflectedTriangleIndex != -1) {
-                    // we have a hit
-                    reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
-                }
-                
+        }
+        
+        // compute reflected ray
+        Vec3Df diff = (cameraOrigin - hit);
+        diff.normalize();
+        Vec3Df reflectedRay = diff - ( (2 * diff.dotProduct(surfaceNormal, diff) ) * surfaceNormal);
+        reflectedRay = -1 * reflectedRay;
+        const double ERR = 1e-12;
+        reflectedRay = reflectedRay + (surfaceNormal*ERR);
+        int reflectedTriangleIndex;
+        Vec3Df reflectedHit;
+        if (m.Ni() == 0.000000) {
+            // reflects
+            intersect(hit, reflectedRay, reflectedTriangleIndex, reflectedHit);
+            
+            if (reflectedTriangleIndex != -1) {
+                // we have a hit
+                reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
                 std::cout << "Calculating color: " << reflectedColor << std::endl;
-
             }
             
-            directLight += ambient + diffuse + specular + reflectedColor;
-            
-        } else {
-            // shadow
-            //directLight = Vec3Df(1, 1, 0);
-            directLight += ambient; // just show ambient
         }
+        
+        directLight += ambient + diffuse + specular + reflectedColor + refractedColor;
 
     }
     
