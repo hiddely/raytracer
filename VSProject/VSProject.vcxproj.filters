@@ -39,6 +39,9 @@
     <ClInclude Include="..\Raytracer\paths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Bla.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Raytracer\main.cpp">
@@ -59,6 +62,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\Raytracer\HumanMesh.mtl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Raytracer\showBox.mtl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -16,6 +16,18 @@ extern unsigned int WindowSize_Y;//window resolution height
 extern unsigned int RayTracingResolutionX;  // largeur fenetre
 extern unsigned int RayTracingResolutionY;  // largeur fenetre
 
+/*class BBox {
+public:
+	Vec3Df min;
+	Vec3Df max;
+
+	//BBox();
+	void check(Triangle tr);
+	bool hit(Vec3Df rayOrigin, Vec3Df rayDest);
+	int longestAxis() const;
+	void init(Triangle tr);
+};*/
+
 //use this function for any preprocessing of the mesh.
 void init();
 
@@ -24,6 +36,10 @@ void init();
 //it is defined elsewhere
 void produceRay(int x_I, int y_I, Vec3Df & origin, Vec3Df & dest);
 
+//bool hit(KDNode* node, const Vec3Df origin, const Vec3Df dest, float t, float tmin);
+bool intersectTriangle(Triangle tr, const Vec3Df & rayOrigin, const Vec3Df & rayDest, Vec3Df& hitPoint, float intersectionDepth);
+Vec3Df trace(int level, const Vec3Df& origin, const Vec3Df& dest);
+BBox initBB(Triangle triangle);
 
 //your main function to rewrite
 Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest);
@@ -34,7 +50,7 @@ void yourDebugDraw();
 //want keyboard interaction? Here it is...
 void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3Df & rayDestination);
 
-void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, Vec3Df & hit);
+void intersect(const Vec3Df & origin, const Vec3Df & dest, int triangleIndex, Vec3Df & hit);
 Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit);
 
 Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex & v2);

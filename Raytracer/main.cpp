@@ -240,14 +240,14 @@ void keyboard(unsigned char key, int x, int y)
 		produceRay(0,WindowSize_Y-1, &origin01, &dest01);
 		produceRay(WindowSize_X-1,0, &origin10, &dest10);
 		produceRay(WindowSize_X-1,WindowSize_Y-1, &origin11, &dest11);
-
+		/*
 		// True for multithreaded tracing
 		boolean MULTITHREAD = true;
 
 		if (MULTITHREAD){
 			std::size_t max = WindowSize_X * WindowSize_Y;
 			std::size_t cores = std::thread::hardware_concurrency();
-			std::cout << "max: " << max << ", cores: " << cores << "\n";
+			//std::cout << "max: " << max << ", cores: " << cores << "\n";
 
 			volatile std::atomic<std::size_t> count(0);
 			std::vector<std::future<void>> future_vector;
@@ -263,7 +263,7 @@ void keyboard(unsigned char key, int x, int y)
 				{
 					while (true)
 					{
-						int index = count++;
+						int index = count+1;
 						if (index > max){
 							done = false;
 							break;
@@ -271,7 +271,7 @@ void keyboard(unsigned char key, int x, int y)
 						int x = index % WindowSize_X;
 						int y = index / WindowSize_X;
 
-						std::cout << "index: " << index << ", x: " << x << ", y: " << y << "\n";
+						//std::cout << "index: " << index << ", x: " << x << ", y: " << y << "\n";
 
 						float xscale = 1.0f - float(x) / (WindowSize_X - 1);
 						float yscale = 1.0f - float(y) / (WindowSize_Y - 1);
@@ -291,7 +291,7 @@ void keyboard(unsigned char key, int x, int y)
 			}
 		}
 		else{
-
+		*/
 			for (double y = 0; y < WindowSize_Y; ++y) {
 				double perc = round((y / WindowSize_Y) * 100);
 				std::cout << "[Raytracing with " << WindowSize_Y << " pixels running]  [" << perc << "%]" << '\r' << std::flush;
@@ -314,7 +314,7 @@ void keyboard(unsigned char key, int x, int y)
 					result.setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
 				}
 			}
-		}
+		//}
 
 		std::cout << "\n" << endl;
 
