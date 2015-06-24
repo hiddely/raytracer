@@ -14,6 +14,7 @@
 #include "imageWriter.h"
 #include "paths.h"
 #include <ctime>
+#include <chrono>
 #include <thread>
 #include <atomic>
 #include <future>
@@ -259,7 +260,8 @@ void keyboard(unsigned char key, int x, int y)
 	{
 		//Pressing r will launch the raytracing.
 		std::cout<<"Raytracing"<<endl;
-		time_t startTime = time(0);
+		auto begin = std::chrono::high_resolution_clock::now();
+		//time_t startTime = time(0);
 
 		//Setup an image with the size of the current image.
 		Image result(WindowSize_X,WindowSize_Y);
@@ -363,8 +365,11 @@ void keyboard(unsigned char key, int x, int y)
 		std::cout << "\n" << endl;
 
 		result.writeImage(IMAGE_PATH);
-		time_t endTime = time(0);
-		std::cout << "The tracing took " << endTime - startTime << " seconds." << std::endl;
+		//time_t endTime = time(0);
+		auto end = std::chrono::high_resolution_clock::now();
+		auto dur = end - begin;
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
+		std::cout << "The tracing took " << float(ms/1000.0) << " seconds." << std::endl;
 		break;
 	}
 	case 27:     // touche ESC
