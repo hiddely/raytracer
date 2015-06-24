@@ -124,8 +124,14 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit,
     
     Vec3Df directLight = Vec3Df(0, 0, 0);
     
+    Material m = getTriangleMaterial(triangleIndex);
+    
+    Triangle triangle = MyMesh.triangles[triangleIndex];
+    
     float lightintensity_ambient = 1.1;
     float lightintensity_specular = 0.8;
+    
+    Vec3Df ambient = 0.5 * m.Kd();
     
     // for each light
     for(std::vector<int>::size_type i = 0; i != MyLightPositions.size(); i++) {
@@ -137,14 +143,9 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit,
         Vec3Df closestHit;
         intersect(lightsource, direction, closestTriangleIndex, closestHit);
         
-        Material m = getTriangleMaterial(triangleIndex);
-        
-        Triangle triangle = MyMesh.triangles[triangleIndex];
-        
         Vec3Df n = getNormal(triangle);
         
         // calculate ambient term
-        Vec3Df ambient = 0.5 * m.Kd();
         Vec3Df diffuse = Vec3Df(0, 0, 0);
         Vec3Df specular = Vec3Df(0, 0, 0);
         Vec3Df reflectedColor = Vec3Df(0, 0, 0);
@@ -167,7 +168,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit,
         }
         
         // compute reflected ray
-        if (m.Ni() > 0.25) {
+        if (m.Ns() > 25) {
             // we shine
             reflectedColor = traceReflectedRay(level, n, hit, ray);
         }
@@ -178,7 +179,7 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit,
     
     //return getTriangleColor(triangleIndex);
 
-    return directLight;
+    return directLight / MyLightPositions.size() * powf(1.5, MyLightPositions.size()-1);
 }
 
 bool set = false;
