@@ -4,6 +4,7 @@
 #endif
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#include <pthread.h>
 #endif
 #include <stdlib.h>
 #include <math.h>
@@ -294,8 +295,11 @@ void keyboard(unsigned char key, int x, int y)
 			int leftOverRows = WindowSize_Y % (rowsPerThread * nthreads);
 			cout << "Amount of leftover rows: " << leftOverRows << endl;
 
+#ifdef WIN32
 			std::thread *t = new std::thread[nthreads];
-
+#else
+			int threads = new int[nthreads];
+#endif
 
 			// test stuff which is not dependant on the amount of cores the machine has, but is there to see if the multithreading works in the first place
 			/*std::thread t1(rayTraceSection, 0, WindowSize_Y / 3, &result, origin, dest, origin00, dest00, origin01, dest01, origin10, dest10, origin11, dest11, 1);
@@ -313,8 +317,11 @@ void keyboard(unsigned char key, int x, int y)
 			//Launch a group of threads
 			for (int i = 0; i < nthreads; ++i) {
 				// start the thread
+#ifdef __APPLE__
+				threads[i] = pthread_create(i, NULL, rayTraceSection, currStart, currEnd, &result, origin, dest, origin00, dest00, origin01, dest01, origin10, dest10, origin11, dest11, i);
+#else
 				t[i] = std::thread(rayTraceSection, currStart, currEnd, &result, origin, dest, origin00, dest00, origin01, dest01, origin10, dest10, origin11, dest11, i);
-
+#endif
 				// set the start for the next loop
 				currStart += rowsPerThread;
 
@@ -331,7 +338,11 @@ void keyboard(unsigned char key, int x, int y)
 
 			for (int i = 0; i < nthreads; ++i)
 			{
+#ifdef __APPLE__
+				pthread_exit(NULL);
+#else
 				t[i].join();
+#endif
 			}
 		}
 		else
