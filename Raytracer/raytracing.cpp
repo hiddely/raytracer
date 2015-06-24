@@ -108,15 +108,9 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
                     hit = p;
                 }
             }
-            
-            //std::cout << "T:"<<t<<"\n";
-            
-            //return Vec3Df;
         }
         
     }
-    
-    //std::cout << "Distance: " << lastDistance << std::endl;
 }
 
 /**
@@ -158,33 +152,23 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit,
         
         if (triangleIndex == closestTriangleIndex) {
             // let there be light
+            
             // calculate diffuse term
-            
             direction.normalize();
-            
             float costheta = Vec3Df::dotProduct(n, direction);
-            
-            // diffuse
             diffuse = lightintensity_ambient * fabs(powf(costheta, 1)) * m.Kd();
         
-            //std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
-
             // specular
             float n_inc = 8;
             Vec3Df link = ((cameraOrigin - hit) - direction);
             link.normalize();
             specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, n)), n_inc) * m.Ks();
             
-            //std::cout << "Pwo: " << powf(link.dotProduct(link, surfaceNormal), n) << std::endl;
-            
         }
         
         // compute reflected ray
-        if (m.Ni() == 0.000000) {
+        if (m.Ni() > 0.25) {
             // we shine
-            //testRayOrigin = cameraOrigin;
-            //testRayDestination = hit;
-            //return traceReflectedRay(level, n, hit, ray);
             reflectedColor = traceReflectedRay(level, n, hit, ray);
         }
         
@@ -217,14 +201,9 @@ Vec3Df traceReflectedRay(unsigned int level, const Vec3Df n, const Vec3Df p, con
     //recursively trace the reflected ray
     intersect(p, dest, reflectedTriangleIndex, reflectedHit);
 
-    //Vec3Df color = shade(level+1, reflectedTriangleIndex, reflectedHit, reflectedHit-p);
     if (reflectedTriangleIndex != -1) {
         return shade(level+1, reflectedTriangleIndex, reflectedHit, reflectedHit-p);
     }
-    
-    //std::cout << "C: " << color << "N: " << n << " P: " << p << " R: " << reflectedRay << std::endl;
-    
-    //return color;
     return Vec3Df(0, 0, 0);
 }
 
@@ -259,7 +238,6 @@ Vec3Df getNormal(const Triangle & triangle)
     Vec3Df n = Vec3Df::crossProduct(edge01, edge02);
     n.normalize();
     return n;
-    
 }
 
 void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w)
@@ -278,6 +256,20 @@ void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float 
 
 bool equals(const Vec3Df & one, const Vec3Df & two) {
     return fabs(one[0] - two[0]) < 1 && fabs(one[1] - two[1]) < 1 && fabs(one[2] - two[2]) < 1;
+}
+
+/**
+ Blends two colors with gradient a
+ **/
+Vec3Df blendColors(const Vec3Df & c1, const Vec3Df & c2, const float a)
+{
+    if (a >= 0 && a <= 1) {
+        return (c1 * a) + (c2 * (1 - a));
+    }
+    else if (a > 0) {
+        return c2;
+    }
+    return c1;
 }
 
 void yourDebugDraw()
