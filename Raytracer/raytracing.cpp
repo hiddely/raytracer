@@ -10,7 +10,7 @@
 #include "paths.h"
 
 
-class BBox {
+/*class BBox {
 public:
 	Vec3Df min;
 	Vec3Df max;
@@ -20,11 +20,11 @@ public:
 	bool hit(Vec3Df rayOrigin, Vec3Df rayDest);
 	int longestAxis() const;
 	void init(Triangle tr);
-};
+};*/
 
-//BBox::BBox(void) {
-	//std::cout << "New Bbox object created" << std::endl;
-//}
+/*BBox::BBox(void) {
+	std::cout << "New Bbox object created" << std::endl;
+}*/
 
 bool BBox::hit(Vec3Df rayOrigin, Vec3Df rayDest) {
 	//X0 is origin van de ray en n is de direction

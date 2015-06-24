@@ -16,7 +16,7 @@ extern unsigned int WindowSize_Y;//window resolution height
 extern unsigned int RayTracingResolutionX;  // largeur fenetre
 extern unsigned int RayTracingResolutionY;  // largeur fenetre
 
-/*class BBox {
+class BBox {
 public:
 	Vec3Df min;
 	Vec3Df max;
@@ -26,7 +26,7 @@ public:
 	bool hit(Vec3Df rayOrigin, Vec3Df rayDest);
 	int longestAxis() const;
 	void init(Triangle tr);
-};*/
+};
 
 //use this function for any preprocessing of the mesh.
 void init();
