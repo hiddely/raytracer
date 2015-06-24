@@ -194,7 +194,44 @@ void produceRay(int x_I, int y_I, Vec3Df * origin, Vec3Df * dest)
 		dest->p[2]=float(z);
 }
 
+// Raytraces a section from yStart to yEnd
+void rayTraceSection(
+	int yStart,
+	int yEnd,
+	Image* result, 
+	Vec3Df& origin, Vec3Df& dest,
+	Vec3Df& origin00, Vec3Df& dest00,
+	Vec3Df& origin01, Vec3Df& dest01,
+	Vec3Df& origin10, Vec3Df& dest10,
+	Vec3Df& origin11, Vec3Df& dest11,
+	int threadID
+	)
+{
+	cout << "Thread " << threadID << " starting... \n" <<
+		"from " << yStart << " to " << yEnd << endl;
+	for (double y = yStart; y < yEnd; ++y) {
+		//std::cout << WindowSize_Y << std::endl;
+		for (unsigned int x = 0; x < WindowSize_X; ++x)
+		{
+			//produce the rays for each pixel, by interpolating 
+			//the four rays of the frustum corners.
+			float xscale = 1.0f - float(x) / (WindowSize_X - 1);
+			float yscale = 1.0f - float(y) / (WindowSize_Y - 1);
 
+			origin = yscale*(xscale*origin00 + (1 - xscale)*origin10) +
+				(1 - yscale)*(xscale*origin01 + (1 - xscale)*origin11);
+			dest = yscale*(xscale*dest00 + (1 - xscale)*dest10) +
+				(1 - yscale)*(xscale*dest01 + (1 - xscale)*dest11);
+
+			//launch raytracing for the given ray.
+			Vec3Df rgb = performRayTracing(origin, dest);
+			//store the result in an image 
+			(*result).setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
+		}
+	}
+
+	cout << "Thread " << threadID << " done" << endl;
+}
 
 
 
@@ -242,59 +279,62 @@ void keyboard(unsigned char key, int x, int y)
 
 		// True for multithreaded tracing
 #ifdef __APPLE__
-		bool MULTITHREAD = false;
+		bool MULTITHREAD = true;
 #else
-        boolean MULTITHREAD = false;
+		boolean MULTITHREAD = true;
 #endif
 
 		if (MULTITHREAD){
-			std::size_t max = WindowSize_X * WindowSize_Y;
-			std::size_t cores = std::thread::hardware_concurrency();
-			std::cout << "max: " << max << ", cores: " << cores << "\n";
+			unsigned static const int nthreads = std::thread::hardware_concurrency();
+			cout << "Amount of Cores: " << nthreads << endl;
+			int rowsPerThread = WindowSize_Y / nthreads;
+			cout << "Amount of rows per thread: " << rowsPerThread << endl;
+			int leftOverRows = WindowSize_Y % (rowsPerThread * nthreads);
+			cout << "Amount of leftover rows: " << leftOverRows << endl;
 
-			volatile std::atomic<std::size_t> count(0);
-			std::vector<std::future<void>> future_vector;
-
-			bool done = true;
+			std::thread *t = new std::thread[nthreads];
 
 
+			// test stuff which is not dependant on the amount of cores the machine has, but is there to see if the multithreading works in the first place
+			/*std::thread t1(rayTraceSection, 0, WindowSize_Y / 3, &result, origin, dest, origin00, dest00, origin01, dest01, origin10, dest10, origin11, dest11, 1);
+			std::thread t2(rayTraceSection, (WindowSize_Y / 3), (WindowSize_Y / 3) * 2, &result, origin, dest, origin00, dest00, origin01, dest01, origin10, dest10, origin11, dest11, 2);
+			std::thread t3(rayTraceSection, (WindowSize_Y / 3) * 2, WindowSize_Y, &result, origin, dest, origin00, dest00, origin01, dest01, origin10, dest10, origin11, dest11, 3);
 
-			while (done){
-				cores--;
-				future_vector.emplace_back(
-					std::async([=, &done, &origin, &dest, &origin00, &origin01, &origin10, &origin11, &dest00, &dest01, &dest10, &dest11, &result, &count]()
+			t1.join();
+			t2.join();
+			t3.join();*/
+
+			// this is the row that the thread starts on
+			int currStart = 0;
+			int currEnd = rowsPerThread;
+
+			//Launch a group of threads
+			for (int i = 0; i < nthreads; ++i) {
+				// start the thread
+				t[i] = std::thread(rayTraceSection, currStart, currEnd, &result, origin, dest, origin00, dest00, origin01, dest01, origin10, dest10, origin11, dest11, i);
+
+				// set the start for the next loop
+				currStart += rowsPerThread;
+
+				// set the end for the next loop, if the next loop is the last loop tack on the remaining lines
+				if (i == nthreads - 2)
 				{
-					while (true)
-					{
-						int index = count++;
-						if (index > max){
-							done = false;
-							break;
-						}
-						int x = index % WindowSize_X;
-						int y = index / WindowSize_X;
+					currEnd = WindowSize_Y;
+				}
+				else
+				{
+					currEnd += rowsPerThread;
+				}
+			}
 
-						std::cout << "index: " << index << ", x: " << x << ", y: " << y << "\n";
-
-						float xscale = 1.0f - float(x) / (WindowSize_X - 1);
-						float yscale = 1.0f - float(y) / (WindowSize_Y - 1);
-
-						origin = yscale*(xscale*origin00 + (1 - xscale)*origin10) +
-
-							(1 - yscale)*(xscale*origin01 + (1 - xscale)*origin11);
-						dest = yscale*(xscale*dest00 + (1 - xscale)*dest10) +
-							(1 - yscale)*(xscale*dest01 + (1 - xscale)*dest11);
-
-						//launch raytracing for the given ray.
-						Vec3Df rgb = performRayTracing(origin, dest);
-						//store the result in an image
-						result.setPixel(x, y, RGBValue(rgb[0], rgb[1], rgb[2]));
-					}
-				}));
+			for (int i = 0; i < nthreads; ++i)
+			{
+				t[i].join();
 			}
 		}
-		else{
-
+		else
+		{
+			cout << "Single thread Raytracing" << endl;
 			for (double y = 0; y < WindowSize_Y; ++y) {
 				double perc = round((y / WindowSize_Y) * 100);
 				std::cout << "[Raytracing with " << WindowSize_Y << " pixels running]  [" << perc << "%]" << '\r' << std::flush;
