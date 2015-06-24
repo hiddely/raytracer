@@ -23,7 +23,7 @@ double green;
 double blue;
 int selectedLight = 0;
 Vec3Df cameraOrigin;
-int maxLevel = 1;
+int maxLevel = 2;
 
 //use this function for any preprocessing of the mesh.
 void init()
@@ -53,7 +53,8 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
     intersect(origin, dest, triangleIndex, hit);
     if (triangleIndex != -1) {
         // we have a hit
-        return shade(0, triangleIndex, hit);
+        Vec3Df ray = dest-origin;
+        return shade(0, triangleIndex, hit, ray);
     }
     
 	return Vec3Df(0, 0, 0);
@@ -87,6 +88,10 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
             
             float t = (D.getLength()-odotn)/ndotd;
             
+            if (t < 0.0005f) {
+                continue;
+            }
+            
             // now we have t, check if we are inside the triangle
             Vec3Df p = origin + t * dest;
             // but p is also ... = a * v0 + b * v1 + (1-a-b) * v2
@@ -117,7 +122,7 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
 /**
  Calculates shading color
  **/
-Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit) {
+Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit, Vec3Df ray) {
     
     if (level > maxLevel) {
         return Vec3Df(0, 0, 0);
@@ -141,12 +146,8 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
         Material m = getTriangleMaterial(triangleIndex);
         
         Triangle triangle = MyMesh.triangles[triangleIndex];
-        Vertex v0 = MyMesh.vertices[triangle.v[0]];
-        Vertex v1 = MyMesh.vertices[triangle.v[1]];
-        Vertex v2 = MyMesh.vertices[triangle.v[2]];
         
-        Vec3Df surfaceNormalP = surfaceNormalTriangle(v0, v1, v2);
-        Vec3Df surfaceNormal = -1 * surfaceNormalP;
+        Vec3Df n = getNormal(triangle);
         
         // calculate ambient term
         Vec3Df ambient = 0.5 * m.Kd();
@@ -157,13 +158,11 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
         
         if (triangleIndex == closestTriangleIndex) {
             // let there be light
-        
-            
             // calculate diffuse term
             
             direction.normalize();
             
-            float costheta = surfaceNormal.dotProduct(surfaceNormal, direction);
+            float costheta = Vec3Df::dotProduct(n, direction);
             
             // diffuse
             diffuse = lightintensity_ambient * fabs(powf(costheta, 1)) * m.Kd();
@@ -171,34 +170,22 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
             //std::cout << "Cos theta: " << surfaceNormal << " and " << diffuse << std::endl;
 
             // specular
-            float n = 8;
+            float n_inc = 8;
             Vec3Df link = ((cameraOrigin - hit) - direction);
             link.normalize();
-            specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, surfaceNormal)), n) * m.Ks();
+            specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, n)), n_inc) * m.Ks();
             
             //std::cout << "Pwo: " << powf(link.dotProduct(link, surfaceNormal), n) << std::endl;
             
         }
         
         // compute reflected ray
-        Vec3Df diff = (cameraOrigin - hit);
-        diff.normalize();
-        Vec3Df reflectedRay = diff - ( (2 * diff.dotProduct(surfaceNormal, diff) ) * surfaceNormal);
-        reflectedRay = -1 * reflectedRay;
-        const double ERR = 1e-12;
-        reflectedRay = reflectedRay + (surfaceNormal*ERR);
-        int reflectedTriangleIndex;
-        Vec3Df reflectedHit;
         if (m.Ni() == 0.000000) {
-            // reflects
-            intersect(hit, reflectedRay, reflectedTriangleIndex, reflectedHit);
-            
-            if (reflectedTriangleIndex != -1) {
-                // we have a hit
-                reflectedColor = shade(level+1, reflectedTriangleIndex, reflectedHit);
-                std::cout << "Calculating color: " << reflectedColor << std::endl;
-            }
-            
+            // we shine
+            //testRayOrigin = cameraOrigin;
+            //testRayDestination = hit;
+            //return traceReflectedRay(level, n, hit, ray);
+            reflectedColor = traceReflectedRay(level, n, hit, ray);
         }
         
         directLight += ambient + diffuse + specular + reflectedColor + refractedColor;
@@ -208,6 +195,37 @@ Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit)
     //return getTriangleColor(triangleIndex);
 
     return directLight;
+}
+
+bool set = false;
+
+//trace the reflection of the ray in p with normal n
+Vec3Df traceReflectedRay(unsigned int level, const Vec3Df n, const Vec3Df p, const Vec3Df ray){
+    Vec3Df v = ray;
+    v.normalize();
+    Vec3Df reflectedRay = v - 2 * (Vec3Df::dotProduct(n, v)) * n;
+    Vec3Df dest = p + reflectedRay;
+    if (!set) {
+        testRayOrigin = p;
+        testRayDestination = dest;
+        set = true;
+    }
+    int reflectedTriangleIndex;
+    Vec3Df reflectedHit;
+    yourDebugDraw();
+    
+    //recursively trace the reflected ray
+    intersect(p, dest, reflectedTriangleIndex, reflectedHit);
+
+    //Vec3Df color = shade(level+1, reflectedTriangleIndex, reflectedHit, reflectedHit-p);
+    if (reflectedTriangleIndex != -1) {
+        return shade(level+1, reflectedTriangleIndex, reflectedHit, reflectedHit-p);
+    }
+    
+    //std::cout << "C: " << color << "N: " << n << " P: " << p << " R: " << reflectedRay << std::endl;
+    
+    //return color;
+    return Vec3Df(0, 0, 0);
 }
 
 Vec3Df getTriangleColor(const unsigned int triangleIndex) {
@@ -232,6 +250,16 @@ Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex 
     }
     
     return product;
+}
+
+Vec3Df getNormal(const Triangle & triangle)
+{
+    Vec3Df edge01 = MyMesh.vertices[triangle.v[1]].p - MyMesh.vertices[triangle.v[0]].p;
+    Vec3Df edge02 = MyMesh.vertices[triangle.v[2]].p - MyMesh.vertices[triangle.v[0]].p;
+    Vec3Df n = Vec3Df::crossProduct(edge01, edge02);
+    n.normalize();
+    return n;
+    
 }
 
 void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w)
@@ -329,8 +357,9 @@ void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3
 	//here, as an example, I use the ray to fill in the values for my upper global ray variable
 	//I use these variables in the debugDraw function to draw the corresponding ray.
 	//try it: Press a key, move the camera, see the ray that was launched as a line.
-	testRayOrigin=rayOrigin;	
-	testRayDestination=rayDestination;
+	//testRayOrigin=rayOrigin;
+	//testRayDestination=rayDestination;
+    set = false;
 	Vec3Df offset;
 	
 	switch (t) {

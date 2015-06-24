@@ -18,7 +18,6 @@
 #include <atomic>
 #include <future>
 
-
 //This is the main application
 //Most of the code in here, does not need to be modified.
 //It is enough to take a look at the function "drawFrame",
