@@ -27,94 +27,99 @@ int maxLevel = 2;
 
 // Bounding box class, used for KD tree. Has a min vector and a max vector, containing
 // the boundaries of the box.
-class BoundingBox {
+class BBox {
 public:
     Vec3Df min;
     Vec3Df max;
     
-    void expand(Triangle triangle);
+    void check(Triangle triangle);
     bool hit(Vec3Df rayOrigin, Vec3Df rayDestination);
-    int longest_axis() const;
+    int longestAxis() const;
 };
 
 // Returns a number which represents the longest axis of a boundingbox:
 // 0 for the x-axis, 1 for the y-axis and 2 for the z-axis
-int BoundingBox::longest_axis() const {
-    int longest = 0;
-    float lengthLongest = max[0] - min[0];
-    
-    if (max[1] - min[1] > lengthLongest) {
-        lengthLongest = max[1] - min[1];
-        longest = 1;
-    }
-    
-    if (max[2] - min[2] > lengthLongest) {
-        longest = 2;
-    }
-    
-    return longest;
+int BBox::longestAxis() const {
+	int longest = 0;
+	float longestLength = max[0] - min[0];
+	float lengthSecond = max[1] - min[1];
+	float lengthThird = max[2] - min[2];
+
+	if (lengthSecond > longestLength) {
+		longestLength = lengthSecond;
+		longest = 1;
+	}
+
+	if (lengthThird > longestLength) {
+		longestLength = lengthThird;
+		longest = 2;
+	}
+	return longest;
 }
 
-// Expand a boundingbax with a triangle (check for every vertex of the triangle if it extends the
-// boundaries of the box)
-void BoundingBox::expand(Triangle triangle) {
+// Check of the coordianates of a triangle are outside the boundingbox. If so, make the boundigbox bigger.
+void BBox::check(Triangle triangle) {
     for (int i = 0; i < 3; i++) {
-        Vec3Df vertex = MyMesh.vertices[triangle.v[i]].p;
-        if (vertex[0] < min[0])
-            min[0] = vertex[0];
-        else if (vertex[0] > max[0])
-            max[0] = vertex[0];
-        if (vertex[1] < min[1])
-            min[1] = vertex[1];
-        else if (vertex[1] > max[1])
-            max[1] = vertex[1];
-        if (vertex[2] < min[2])
-            min[2] = vertex[2];
-        else if (vertex[2] > max[2])
-            max[2] = vertex[2];
+        Vec3Df v = MyMesh.vertices[triangle.v[i]].p;
+		if (v[0] < min[0]) {
+			min[0] = v[0];
+		}
+		else if (v[0] > max[0]) {
+			max[0] = v[0];
+		}
+
+		if (v[1] < min[1]) {
+			min[1] = v[1];
+		}
+		else if (v[1] > max[1]) {
+			max[1] = v[1];
+		}
+
+		if (v[2] < min[2]) {
+			min[2] = v[2];
+		}            
+		else if (v[2] > max[2]) {
+			max[2] = v[2];
+		}
     }
-}
+}	
 
 // Method to check if a ray hit a bounding box (ray/box intersection)
-bool BoundingBox::hit(Vec3Df rayOrigin, Vec3Df rayDestination) {
-    float tmin = std::numeric_limits<float>::min(),
-    tmax = std::numeric_limits<float>::max();
+bool BBox::hit(Vec3Df rayOrigin, Vec3Df rayDest) {
     
-    Vec3Df rayDir = rayDestination - rayOrigin;
-    
+    Vec3Df rayDir = rayDest - rayOrigin;
+	float tmin = 0;
+	float tmax = 1000000;
+	
 	//Check if x direction of the ray goes between the minimum and maximum x-values of the boundingbox
-    if (rayDir[0] != 0.0) {
+    if (rayDir[0] != 0.f) {
         float tx1 = (min[0] - rayOrigin[0]) / rayDir[0];
         float tx2 = (max[0] - rayOrigin[0]) / rayDir[0];
         
-        tmin = std::max(tmin, std::min(tx1, tx2));
-        tmax = std::min(tmax, std::max(tx1, tx2));
-    }
-    else if (rayOrigin[0] < min[0] || rayOrigin[0] > max[0]) {
-        return false;
+        tmin = std::fmaxf(tmin, std::fminf(tx1, tx2));
+        tmax = std::fminf(tmax, std::fmaxf(tx1, tx2));
     }
     
 	//Check if y direction of the ray goes between the minimum and maximum x-values of the boundingbox
-    if (rayDir[1] != 0.0) {
+    if (rayDir[1] != 0.f) {
         float tx1 = (min[1] - rayOrigin[1]) / rayDir[1];
         float tx2 = (max[1] - rayOrigin[1]) / rayDir[1];
         
-        tmin = std::max(tmin, std::min(tx1, tx2));
-        tmax = std::min(tmax, std::max(tx1, tx2));
-    }
-    else if (rayOrigin[1] < min[1] || rayOrigin[1] > max[1]) {
-        return false;
+        tmin = std::fmaxf(tmin, std::fminf(tx1, tx2));
+        tmax = std::fminf(tmax, std::fmaxf(tx1, tx2));
     }
     
 	//Check if z direction of the ray goes between the minimum and maximum x-values of the boundingbox
-    if (rayDir[2] != 0.0) {
+    if (rayDir[2] != 0.f) {
         float tx1 = (min[2] - rayOrigin[2]) / rayDir[2];
         float tx2 = (max[2] - rayOrigin[2]) / rayDir[2];
         
-        tmin = std::max(tmin, std::min(tx1, tx2));
-        tmax = std::min(tmax, std::max(tx1, tx2));
+        tmin = std::fmaxf(tmin, std::fminf(tx1, tx2));
+        tmax = std::fminf(tmax, std::fmaxf(tx1, tx2));
     }
-    else if (rayOrigin[2] < min[2] || rayOrigin[2] > max[2]) {
+	else if (rayOrigin[0] < min[0] || rayOrigin[0] > max[0] || rayOrigin[1] < min[1] || 
+		rayOrigin[1] > max[1] || rayOrigin[2] < min[2] || rayOrigin[2] > max[2]) {
+
         return false;
     }
     
@@ -123,13 +128,13 @@ bool BoundingBox::hit(Vec3Df rayOrigin, Vec3Df rayDestination) {
 }
 
 // Initializes a bounding box with one triangle
-BoundingBox getBB(Triangle triangle) {
-    BoundingBox bb;
+BBox initBBox(Triangle triangle) {
+    BBox bbox;
     
-    Vec3Df vertex = MyMesh.vertices[triangle.v[0]].p;
+    Vec3Df v = MyMesh.vertices[triangle.v[0]].p;
     
-    Vec3Df min = Vec3Df(vertex[0], vertex[1], vertex[2]);
-    Vec3Df max = Vec3Df(vertex[0], vertex[1], vertex[2]);
+    Vec3Df min = Vec3Df(v[0], v[1], v[2]);
+    Vec3Df max = Vec3Df(v[0], v[1], v[2]);
     
 	// find the smallest x, y and z out of all three vertices of the triangle
     for (int i = 1; i < 3; i++) {
@@ -148,30 +153,32 @@ BoundingBox getBB(Triangle triangle) {
             max[2] = vertex[2];
     }
     
-    bb.min = min;
-    bb.max = max;
+    bbox.min = min;
+    bbox.max = max;
     
-    return bb;
+    return bbox;
 }
 
 // Gets the middlepoint of a triangle
-Vec3Df getMidPoint(Triangle triangle) {
-    Vec3Df v0 = MyMesh.vertices[triangle.v[0]].p;
-    Vec3Df v1 = MyMesh.vertices[triangle.v[1]].p;
-    Vec3Df v2 = MyMesh.vertices[triangle.v[2]].p;
-    
-    float xMiddle = (v0[0] + v1[0] + v2[0]) / 3;
-    float yMiddle = (v0[1] + v1[1] + v2[1]) / 3;
-    float zMiddle = (v0[2] + v1[2] + v2[2]) / 3;
-    
-    return Vec3Df(xMiddle, yMiddle, zMiddle);
+Vec3Df findMiddle(Triangle tr) {
+	std::vector<Vertex> vertices = MyMesh.vertices;
+	Vertex v0 = vertices[tr.v[0]];
+	Vertex v1 = vertices[tr.v[1]];
+	Vertex v2 = vertices[tr.v[2]];
+
+	float xMid = (v0.p[0] + v1.p[0] + v2.p[0]) / 3;
+	float yMid = (v0.p[1] + v1.p[1] + v2.p[1]) / 3;
+	float zMid = (v0.p[2] + v1.p[2] + v2.p[2]) / 3;
+
+	Vec3Df result = Vec3Df(xMid, yMid, zMid);
+	return result;
 }
 
 // Class which represents a kdtree: each KDNode has a left and right child which are KDNodes, has a BoundingBox which contain the minima
 // and maxima of all the triangles in the node and contains the indices of all the triangles in the node
 class KDNode {
 public:
-    BoundingBox bbox;
+    BBox bbox;
     KDNode* left;
     KDNode* right;
     std::vector<int> triangles;
@@ -180,21 +187,20 @@ public:
 };
 
 // Builds a kdtree
-KDNode* KDNode::build(std::vector<int>& triangles, int depth) const {
+KDNode* KDNode::build(std::vector<int>& tris, int depth) const {
 	// initialize nodes
     KDNode* node = new KDNode();
-    node->triangles = triangles;
+    node->triangles = tris;
     node->left = NULL;
     node->right = NULL;
-    node->bbox = BoundingBox();
+    node->bbox = BBox();
     
 	// If no triangles the tree is empty
-    if (triangles.size() == 0)
+    if (tris.size() == 0)
         return node;
-    
 	// Handle 1 triangle corner scenario
-    if (triangles.size() == 1) {
-        node->bbox = getBB(MyMesh.triangles[triangles[0]]);
+    if (tris.size() == 1) {
+        node->bbox = initBBox(MyMesh.triangles[tris[0]]);
         node->left = new KDNode();
         node->right = new KDNode();
         node->left->triangles = std::vector<int>();
@@ -203,33 +209,33 @@ KDNode* KDNode::build(std::vector<int>& triangles, int depth) const {
     }
     
     // get a bounding box surrounding all the triangles
-    node->bbox = getBB(MyMesh.triangles[triangles[0]]);
+    node->bbox = initBBox(MyMesh.triangles[tris[0]]);
     
 	// build the tree
-    for (int i = 1; i < triangles.size(); i++) {
-        node->bbox.expand(MyMesh.triangles[triangles[i]]);
+    for (int i = 1; i < tris.size(); i++) {
+        node->bbox.check(MyMesh.triangles[tris[i]]);
     }
     
     Vec3Df midpt(0, 0, 0);
-    for (int i = 0; i < triangles.size(); i++) {
+    for (int i = 0; i < tris.size(); i++) {
         // find midpoint of all triangles
-        midpt = midpt + (getMidPoint(MyMesh.triangles[triangles[i]]) * (1.0 / triangles.size()));
+        midpt = midpt + findMiddle(MyMesh.triangles[tris[i]]) * (1.0 / tris.size());
     }
     
     std::vector<int> left_triangles;
     std::vector<int> right_triangles;
-    int axis = node->bbox.longest_axis();
-    for (int i = 0; i < triangles.size(); i++) {
+    int axis = node->bbox.longestAxis();
+    for (int i = 0; i < tris.size(); i++) {
         // split triangles based on their midpoints side of avg in longest axis
         switch (axis) {
             case 0:
-                midpt[0] >= getMidPoint(MyMesh.triangles[triangles[i]])[0] ? right_triangles.push_back(triangles[i]) : left_triangles.push_back(triangles[i]);
+                midpt[0] >= findMiddle(MyMesh.triangles[tris[i]])[0] ? right_triangles.push_back(tris[i]) : left_triangles.push_back(tris[i]);
                 break;
             case 1:
-                midpt[1] >= getMidPoint(MyMesh.triangles[triangles[i]])[1] ? right_triangles.push_back(triangles[i]) : left_triangles.push_back(triangles[i]);
+                midpt[1] >= findMiddle(MyMesh.triangles[tris[i]])[1] ? right_triangles.push_back(tris[i]) : left_triangles.push_back(tris[i]);
                 break;
             case 2:
-                midpt[2] >= getMidPoint(MyMesh.triangles[triangles[i]])[2] ? right_triangles.push_back(triangles[i]) : left_triangles.push_back(triangles[i]);
+                midpt[2] >= findMiddle(MyMesh.triangles[tris[i]])[2] ? right_triangles.push_back(tris[i]) : left_triangles.push_back(tris[i]);
                 break;
         }
     }
@@ -251,11 +257,6 @@ KDNode* KDNode::build(std::vector<int>& triangles, int depth) const {
 
 KDNode* root;// = new KDNode();
 
-// Data for the recursive calls for hit
-struct intersection_state {
-    float intersectionDepth = 1000000;
-    int triangleIndex = -1;
-};
 bool hit(KDNode* node, const Vec3Df& rayOrigin, const Vec3Df& rayDestination, const Vec3Df& rayDirection, Vec3Df& _p, float & lastDistance, int & triangleIndex) {
     // check if ray intersects bounding box of given node
     if (node->bbox.hit(rayOrigin, rayDestination)) {
@@ -311,29 +312,30 @@ bool hit(KDNode* node, const Vec3Df& rayOrigin, const Vec3Df& rayDestination, co
     return false;
 }
 
-//return the position along the ray where the plane spanned by the triangle is intersected
-float intersectPlane(const Vec3Df & rayOrigin, const Vec3Df & rayDestination, const Triangle & triangle)
+//return the t for which the ray intersects with the triangle.
+float intersectPlane(const Vec3Df & rayOrigin, const Vec3Df & rayDest, const Triangle & tr)
 {
-    Vec3Df v0 = MyMesh.vertices[triangle.v[0]].p;
-    Vec3Df v1 = MyMesh.vertices[triangle.v[1]].p;
-    Vec3Df v2 = MyMesh.vertices[triangle.v[2]].p;
+    Vec3Df vec0 = MyMesh.vertices[tr.v[0]].p;
+    Vec3Df vec1 = MyMesh.vertices[tr.v[1]].p;
+    Vec3Df vec2 = MyMesh.vertices[tr.v[2]].p;
     
-    Vec3Df n = getNormal(triangle);
+    Vec3Df normal = getNormal(tr);
     
 	// If necessary turn around the normal
-    if (Vec3Df::dotProduct(n, v0) < 0 || Vec3Df::dotProduct(n, v1) < 0 || Vec3Df::dotProduct(n, v2) < 0)
+	if (Vec3Df::dotProduct(normal, vec0) < 0 || Vec3Df::dotProduct(normal, vec1) < 0 || Vec3Df::dotProduct(normal, vec2) < 0)
     {
-        n *= -1;
+		//get the right normal by making it positive.
+        normal *= -1;
     }
     
-    Vec3Df rayDirection = rayDestination - rayOrigin;
+    Vec3Df rayDir = rayDest - rayOrigin;
     
-    float D = Vec3Df::dotProduct(v2, n);
-    float distanceFromRayToNormal = Vec3Df::dotProduct(rayDirection, n);
+	float Dot = Vec3Df::dotProduct(vec2, normal);
+    float distRayNorm = Vec3Df::dotProduct(rayDir, normal);
     
 	// compute actual  ray triangle intersection point
-    if (!(distanceFromRayToNormal < 0.0001f && distanceFromRayToNormal > -0.0001f)){
-        float t = (D - (Vec3Df::dotProduct(rayOrigin, n))) / distanceFromRayToNormal;
+	if (!(distRayNorm < 0.0001f && distRayNorm > -0.0001f)){
+		float t = (Dot - (Vec3Df::dotProduct(rayOrigin, normal))) / distRayNorm;
         return t;
     }
     else
@@ -342,31 +344,10 @@ float intersectPlane(const Vec3Df & rayOrigin, const Vec3Df & rayDestination, co
     }
 }
 
-// Compute barycentric coordinates (u, v, w) for
-// point p with respect to triangle (a, b, c)
-void Barycentric(const Vec3Df & p, const Vec3Df & a, const Vec3Df & b, const Vec3Df & c, float &v, float &w)
-{
-    Vec3Df v0 = b - a, v1 = c - a, v2 = p - a;
-    float d00 = Vec3Df::dotProduct(v0, v0);
-    float d01 = Vec3Df::dotProduct(v0, v1);
-    float d11 = Vec3Df::dotProduct(v1, v1);
-    float d20 = Vec3Df::dotProduct(v2, v0);
-    float d21 = Vec3Df::dotProduct(v2, v1);
-    float denom = d00 * d11 - d01 * d01;
-    v = (d11 * d20 - d01 * d21) / denom;
-    w = (d00 * d21 - d01 * d20) / denom;
-}
-
 //use this function for any preprocessing of the mesh.
 void init()
 {
-	//load the mesh file
-	//please realize that not all OBJ files will successfully load.
-	//Nonetheless, if they come from Blender, they should, if they 
-	//are exported as WavefrontOBJ.
-	//PLEASE ADAPT THE LINE BELOW TO THE FULL PATH OF THE dodgeColorTest.obj
-	//model, e.g., "C:/temp/myData/GraphicsIsFun/dodgeColorTest.obj", 
-	//otherwise the application will not load properly
+	//load the mesh file, change path in paths.h
     MyMesh.loadMesh(MESH_PATH, true);
 	MyMesh.computeVertexNormals();
 
@@ -401,7 +382,7 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
         return shade(0, triangleIndex, p, ray);
     }
     
-	return Vec3Df(0, 0, 0);
+	return Vec3Df(0.1, 0.1, 0.1);
 }
 
 /**
@@ -466,10 +447,11 @@ bool pointInTriangle(const Vec3Df & p, const Triangle & triangle)
     
     float a;
     float b;
-    Barycentric(p, v0, v1, v2, a, b);
+	float c;
+    computeBarycentric(p, v0, v1, v2, c, a, b);
     
 	// compute if the point is within the triangle borders
-    if (a >= 0 && a <= 1 && b >= 0 && (a + b) <= 1)
+    if (a >= 0 && a <= 1 && b >= 0 && c>= 0)
     {
         return true;
     }
@@ -636,20 +618,6 @@ void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float 
 // Equals method for two vectors
 bool equals(const Vec3Df & one, const Vec3Df & two) {
     return fabs(one[0] - two[0]) < 1 && fabs(one[1] - two[1]) < 1 && fabs(one[2] - two[2]) < 1;
-}
-
-/**
- Blends two colors with gradient a
- **/
-Vec3Df blendColors(const Vec3Df & c1, const Vec3Df & c2, const float a)
-{
-    if (a >= 0 && a <= 1) {
-        return (c1 * a) + (c2 * (1 - a));
-    }
-    else if (a > 0) {
-        return c2;
-    }
-    return c1;
 }
 
 // Method to draw the debugger screen every frame
