@@ -23,7 +23,7 @@ double green;
 double blue;
 int selectedLight = 0;
 Vec3Df cameraOrigin;
-int maxLevel = 2;
+int maxLevel = 4;
 
 // Bounding box class, used for KD tree. Has a min vector and a max vector, containing
 // the boundaries of the box.
@@ -159,18 +159,17 @@ BBox initBBox(Triangle tr) {
 }
 
 // Gets the middlepoint of a triangle
-Vec3Df findMiddle(Triangle tr) {
-	std::vector<Vertex> vertices = MyMesh.vertices;
-	Vertex v0 = vertices[tr.v[0]];
-	Vertex v1 = vertices[tr.v[1]];
-	Vertex v2 = vertices[tr.v[2]];
+Vec3Df findMiddle(Triangle triangle) {
+		Vec3Df v0 = MyMesh.vertices[triangle.v[0]].p;
+		Vec3Df v1 = MyMesh.vertices[triangle.v[1]].p;
+		Vec3Df v2 = MyMesh.vertices[triangle.v[2]].p;
 
-	float xMid = (v0.p[0] + v1.p[0] + v2.p[0]) / 3;
-	float yMid = (v0.p[1] + v1.p[1] + v2.p[1]) / 3;
-	float zMid = (v0.p[2] + v1.p[2] + v2.p[2]) / 3;
+		float xMiddle = (v0[0] + v1[0] + v2[0]) / 3;
+		float yMiddle = (v0[1] + v1[1] + v2[1]) / 3;
+		float zMiddle = (v0[2] + v1[2] + v2[2]) / 3;
 
-	Vec3Df result = Vec3Df(xMid, yMid, zMid);
-	return result;
+		return Vec3Df(xMiddle, yMiddle, zMiddle);
+
 }
 
 // Class which represents a kdtree: each KDNode has a left and right child which are KDNodes, has a BoundingBox which contain the minima
