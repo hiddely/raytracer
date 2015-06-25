@@ -1,0 +1,30 @@
+# 
+# Wavefront material file
+# Converted by 3D Exploration 1.7
+# XDimension Software, LLC
+# http://www.xdsoft.com/explorer/
+# 
+newmtl video_cube_sides
+	 Ka 0 0 0
+	 Kd 0.117647 0.117647 0.117647
+	 Ks 0.313726 0.313726 0.313726
+	 illum 2
+	 Ns 5.65685
+newmtl video_cube_screen
+	 Ka 0 0 0
+	 Kd 0 0 0
+	 Ks 0 0 0
+	 illum 2
+	 Ns 8
+newmtl base
+	 Ka 0 0 0
+	 Kd 0.313726 0.313726 0.313726
+	 Ks 0 0 0
+	 illum 2
+	 Ns 8
+newmtl base_front
+	 Ka 0 0 0
+	 Kd 0.313726 0.313726 0.313726
+	 Ks 0 0 0
+	 illum 2
+	 Ns 8

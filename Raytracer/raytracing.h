@@ -35,7 +35,7 @@ void yourDebugDraw();
 void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3Df & rayDestination);
 
 void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, Vec3Df & hit);
-Vec3Df shade(unsigned int level, const unsigned int triangleIndex, Vec3Df & hit, Vec3Df ray);
+Vec3Df shade(unsigned int level, const int triangleIndex, Vec3Df & hit, Vec3Df ray);
 
 Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex & v2);
 Vec3Df getTriangleColor(const unsigned int triangleIndex);
@@ -44,6 +44,9 @@ void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float 
 Material getTriangleMaterial(const unsigned int triangleIndex);
 Vec3Df traceReflectedRay(unsigned int level, const Vec3Df n, const Vec3Df p, const Vec3Df ray);
 Vec3Df getNormal(const Triangle & triangle);
+
+float intersectPlane(const Vec3Df & rayOrigin, const Vec3Df & rayDestination, const Triangle & triangle);
+bool pointInTriangle(const Vec3Df & p, const Triangle & triangle);
 
 void setMoveLightRay(std::string dir);
 
