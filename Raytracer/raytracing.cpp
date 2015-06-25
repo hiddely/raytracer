@@ -158,18 +158,18 @@ BBox initBBox(Triangle tr) {
     return bbox;
 }
 
-// Gets the middlepoint of a triangle
-Vec3Df findMiddle(Triangle triangle) {
-		Vec3Df v0 = MyMesh.vertices[triangle.v[0]].p;
-		Vec3Df v1 = MyMesh.vertices[triangle.v[1]].p;
-		Vec3Df v2 = MyMesh.vertices[triangle.v[2]].p;
+// finds the middlepoint of a triangle
+Vec3Df findMiddle(Triangle tr) {
+		Vec3Df vec0 = MyMesh.vertices[tr.v[0]].p;
+		Vec3Df vec1 = MyMesh.vertices[tr.v[1]].p;
+		Vec3Df vec2 = MyMesh.vertices[tr.v[2]].p;
 
-		float xMiddle = (v0[0] + v1[0] + v2[0]) / 3;
-		float yMiddle = (v0[1] + v1[1] + v2[1]) / 3;
-		float zMiddle = (v0[2] + v1[2] + v2[2]) / 3;
+		float xMiddle = (vec0[0] + vec1[0] + vec2[0]) / 3;
+		float yMiddle = (vec0[1] + vec1[1] + vec2[1]) / 3;
+		float zMiddle = (vec0[2] + vec1[2] + vec2[2]) / 3;
 
-		return Vec3Df(xMiddle, yMiddle, zMiddle);
-
+		Vec3Df result = Vec3Df(xMiddle, yMiddle, zMiddle);
+		return result;
 }
 
 // Class which represents a kdtree: each KDNode has a left and right child which are KDNodes, has a BoundingBox which contain the minima
