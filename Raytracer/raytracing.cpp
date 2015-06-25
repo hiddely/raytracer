@@ -33,7 +33,7 @@ public:
     Vec3Df max;
     
     void check(Triangle triangle);
-    bool hit(Vec3Df rayOrigin, Vec3Df rayDestination);
+    bool hitBox(Vec3Df rayOrigin, Vec3Df rayDestination);
     int longestAxis() const;
 };
 
@@ -58,34 +58,33 @@ int BBox::longestAxis() const {
 }
 
 // Check of the coordianates of a triangle are outside the boundingbox. If so, make the boundigbox bigger.
-void BBox::check(Triangle triangle) {
+void BBox::check(Triangle tr) {
     for (int i = 0; i < 3; i++) {
-        Vec3Df v = MyMesh.vertices[triangle.v[i]].p;
+        Vec3Df v = MyMesh.vertices[tr.v[i]].p;
 		if (v[0] < min[0]) {
 			min[0] = v[0];
 		}
-		else if (v[0] > max[0]) {
-			max[0] = v[0];
-		}
-
 		if (v[1] < min[1]) {
 			min[1] = v[1];
-		}
-		else if (v[1] > max[1]) {
-			max[1] = v[1];
-		}
-
+		}		
 		if (v[2] < min[2]) {
 			min[2] = v[2];
-		}            
-		else if (v[2] > max[2]) {
+		}
+
+		if (v[0] > max[0]) {
+			max[0] = v[0];
+		}
+		if (v[1] > max[1]) {
+			max[1] = v[1];
+		}
+		if (v[2] > max[2]) {
 			max[2] = v[2];
 		}
     }
 }	
 
 // Method to check if a ray hit a bounding box (ray/box intersection)
-bool BBox::hit(Vec3Df rayOrigin, Vec3Df rayDest) {
+bool BBox::hitBox(Vec3Df rayOrigin, Vec3Df rayDest) {
     
     Vec3Df rayDir = rayDest - rayOrigin;
 	float tmin = 0;
@@ -100,7 +99,7 @@ bool BBox::hit(Vec3Df rayOrigin, Vec3Df rayDest) {
         tmax = std::fminf(tmax, std::fmaxf(tx1, tx2));
     }
     
-	//Check if y direction of the ray goes between the minimum and maximum x-values of the boundingbox
+	//Check if y direction of the ray goes between the minimum and maximum y-values of the boundingbox
     if (rayDir[1] != 0.f) {
         float tx1 = (min[1] - rayOrigin[1]) / rayDir[1];
         float tx2 = (max[1] - rayOrigin[1]) / rayDir[1];
@@ -109,7 +108,7 @@ bool BBox::hit(Vec3Df rayOrigin, Vec3Df rayDest) {
         tmax = std::fminf(tmax, std::fmaxf(tx1, tx2));
     }
     
-	//Check if z direction of the ray goes between the minimum and maximum x-values of the boundingbox
+	//Check if z direction of the ray goes between the minimum and maximum z-values of the boundingbox
     if (rayDir[2] != 0.f) {
         float tx1 = (min[2] - rayOrigin[2]) / rayDir[2];
         float tx2 = (max[2] - rayOrigin[2]) / rayDir[2];
@@ -128,17 +127,17 @@ bool BBox::hit(Vec3Df rayOrigin, Vec3Df rayDest) {
 }
 
 // Initializes a bounding box with one triangle
-BBox initBBox(Triangle triangle) {
+BBox initBBox(Triangle tr) {
     BBox bbox;
     
-    Vec3Df v = MyMesh.vertices[triangle.v[0]].p;
+    Vec3Df v = MyMesh.vertices[tr.v[0]].p;
     
     Vec3Df min = Vec3Df(v[0], v[1], v[2]);
     Vec3Df max = Vec3Df(v[0], v[1], v[2]);
     
 	// find the smallest x, y and z out of all three vertices of the triangle
     for (int i = 1; i < 3; i++) {
-        Vec3Df vertex = MyMesh.vertices[triangle.v[i]].p;
+        Vec3Df vertex = MyMesh.vertices[tr.v[i]].p;
         if (vertex[0] < min[0])
             min[0] = vertex[0];
         else if (vertex[0] > max[0])
@@ -211,44 +210,50 @@ KDNode* KDNode::build(std::vector<int>& tris, int depth) const {
     // get a bounding box surrounding all the triangles
     node->bbox = initBBox(MyMesh.triangles[tris[0]]);
     
-	// build the tree
+	// Check for every trinagle in the node if it does not go outside the boundingbox.
     for (int i = 1; i < tris.size(); i++) {
         node->bbox.check(MyMesh.triangles[tris[i]]);
     }
     
-    Vec3Df midpt(0, 0, 0);
+    Vec3Df midPoint(0, 0, 0);
     for (int i = 0; i < tris.size(); i++) {
         // find midpoint of all triangles
-        midpt = midpt + findMiddle(MyMesh.triangles[tris[i]]) * (1.0 / tris.size());
+        midPoint = midPoint + findMiddle(MyMesh.triangles[tris[i]]) * (1.0 / tris.size());
     }
     
-    std::vector<int> left_triangles;
-    std::vector<int> right_triangles;
+    std::vector<int> left_tris;
+    std::vector<int> right_tris;
     int axis = node->bbox.longestAxis();
     for (int i = 0; i < tris.size(); i++) {
         // split triangles based on their midpoints side of avg in longest axis
         switch (axis) {
             case 0:
-                midpt[0] >= findMiddle(MyMesh.triangles[tris[i]])[0] ? right_triangles.push_back(tris[i]) : left_triangles.push_back(tris[i]);
+				//We split on the x-axis.
+                midPoint[0] >= findMiddle(MyMesh.triangles[tris[i]])[0] ? right_tris.push_back(tris[i]) : left_tris.push_back(tris[i]);
                 break;
             case 1:
-                midpt[1] >= findMiddle(MyMesh.triangles[tris[i]])[1] ? right_triangles.push_back(tris[i]) : left_triangles.push_back(tris[i]);
+				//We split on the y-axis.
+                midPoint[1] >= findMiddle(MyMesh.triangles[tris[i]])[1] ? right_tris.push_back(tris[i]) : left_tris.push_back(tris[i]);
                 break;
             case 2:
-                midpt[2] >= findMiddle(MyMesh.triangles[tris[i]])[2] ? right_triangles.push_back(tris[i]) : left_triangles.push_back(tris[i]);
+				//We split on the z-axis.
+                midPoint[2] >= findMiddle(MyMesh.triangles[tris[i]])[2] ? right_tris.push_back(tris[i]) : left_tris.push_back(tris[i]);
                 break;
         }
     }
     
-    bool done = false;
+    bool doneWithRecursing = false;
+
     // If either of the childs has no triangles, stop
-    if (left_triangles.size() == 0 || right_triangles.size() == 0) 
-        done = true;
+	if (left_tris.size() == 0 || right_tris.size() == 0) { doneWithRecursing = true; }
     
-    if (!done) {
+	if (doneWithRecursing) {
+		//Do nothing.
+	}
+	else {
         // recurse down left and right sides
-        node->left = build(left_triangles, depth + 1);
-        node->right = build(right_triangles, depth + 1);
+        node->left = build(left_tris, depth + 1);
+        node->right = build(right_tris, depth + 1);
     }
     
     return node;
@@ -259,27 +264,26 @@ KDNode* root;// = new KDNode();
 
 bool hit(KDNode* node, const Vec3Df& rayOrigin, const Vec3Df& rayDestination, const Vec3Df& rayDirection, Vec3Df& _p, float & lastDistance, int & triangleIndex) {
     // check if ray intersects bounding box of given node
-    if (node->bbox.hit(rayOrigin, rayDestination)) {
-        bool hit_triangle = false;
-        bool hasChildren = false;
+    if (node->bbox.hitBox(rayOrigin, rayDestination)) {
+        bool hit_tri = false;
+        bool hasChilds = false;
         bool hitleft;
         bool hitright;
         
         // if either child still has triangles, recurse down both sides and check for intersections
         if (node->left != NULL) {
             if (node->left->triangles.size() > 0) {
-                hasChildren = true;
+                hasChilds = true;
                 hitleft = hit(node->left, rayOrigin, rayDestination, rayDirection, _p, lastDistance, triangleIndex);
             }
         }
         if (node->right != NULL) {
             if (node->right->triangles.size() > 0) {
-                hasChildren = true;
+                hasChilds = true;
                 hitright = hit(node->right, rayOrigin, rayDestination, rayDirection, _p, lastDistance, triangleIndex);
             }
         }
-        if (hasChildren)
-            return hitleft || hitright;
+		if (hasChilds) { return hitleft || hitright; }
         else {
             // reached a leaf
             for (int i = 0; i < node->triangles.size(); i++) {
@@ -294,9 +298,10 @@ bool hit(KDNode* node, const Vec3Df& rayOrigin, const Vec3Df& rayDestination, co
                     // check if there is a hit with the triangle
                     if (pointInTriangle(p, triangle))
                     {
+						//check if the intersection is the closest current one.
                         if (t < lastDistance)
                         {
-                            hit_triangle = true;
+                            hit_tri = true;
                             lastDistance = t;
                             triangleIndex = triangleIn;
                             _p = p;
@@ -304,7 +309,7 @@ bool hit(KDNode* node, const Vec3Df& rayOrigin, const Vec3Df& rayDestination, co
                     }
                 }
             }
-            if (hit_triangle)
+            if (hit_tri)
                 return true;
             return false;
         }
@@ -360,8 +365,7 @@ void init()
     std::vector<int> triangleIndexes;
     for (int i = 0; i < MyMesh.triangles.size(); i++) {
         triangleIndexes.push_back(i);
-    }
-    
+    }    
     root = root->build(triangleIndexes, 0);
 }
 
@@ -384,16 +388,16 @@ Vec3Df performRayTracing(const Vec3Df & origin, const Vec3Df & dest)
     
 	return Vec3Df(0.1, 0.1, 0.1);
 }
-
+/*
 /**
  Checks if there is an intersection between the ray and the triangles, returns closest triangleIndex
- **/
+ *
 void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, Vec3Df & hit) {
     std::vector<Vertex> vertices = MyMesh.vertices;
     float lastDistance = 100000000; // big number
     triangleIndex = -1; // -1 means no hit
     for(std::vector<int>::size_type i = 0; i != MyMesh.triangles.size(); i++) {
-        /* std::cout << *it; ... */
+        /* std::cout << *it; ... 
         // single triangle
         Triangle triangle = MyMesh.triangles[i];
         Vertex v0 = vertices[triangle.v[0]];
@@ -436,10 +440,10 @@ void intersect(const Vec3Df & origin, const Vec3Df & dest, int & triangleIndex, 
         }
         
     }
-}
+}*/
 
 //return if point p is within the triangle
-bool pointInTriangle(const Vec3Df & p, const Triangle & triangle)
+bool pointInTriangle(const Vec3Df & point, const Triangle & triangle)
 {
     Vec3Df v0 = MyMesh.vertices[triangle.v[0]].p;
     Vec3Df v1 = MyMesh.vertices[triangle.v[1]].p;
@@ -448,7 +452,7 @@ bool pointInTriangle(const Vec3Df & p, const Triangle & triangle)
     float a;
     float b;
 	float c;
-    computeBarycentric(p, v0, v1, v2, c, a, b);
+    computeBarycentric(point, v0, v1, v2, c, a, b);
     
 	// compute if the point is within the triangle borders
     if (a >= 0 && a <= 1 && b >= 0 && c>= 0)
@@ -495,37 +499,36 @@ Vec3Df shade(unsigned int level, const int triangleIndex, Vec3Df & p, Vec3Df ray
         
         //std::cout << "Index: " << closestTriangleIndex << " and n " << triangleIndex << "Hit; " << h << std::endl;
         
-        Vec3Df n = getNormal(triangle);
+        Vec3Df normal = getNormal(triangle);
         
         // calculate ambient term
         Vec3Df diffuse = Vec3Df(0, 0, 0);
         Vec3Df specular = Vec3Df(0, 0, 0);
         Vec3Df reflectedColor = Vec3Df(0, 0, 0);
-        Vec3Df refractedColor = Vec3Df(0, 0, 0);
         
         if (triangleIndex == closestTriangleIndex) {
             // let there be light
             
             // calculate diffuse term
             direction.normalize();
-            float costheta = Vec3Df::dotProduct(n, direction);
+            float costheta = Vec3Df::dotProduct(normal, direction);
             diffuse = lightintensity_ambient * fabs(powf(costheta, 5)) * m.Kd();
         
             // specular
             float n_inc = 8;
             Vec3Df link = ((cameraOrigin - p) - direction);
             link.normalize();
-            specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, n)), n_inc) * m.Ks();
+            specular = lightintensity_specular * powf(fabsf(link.dotProduct(link, normal)), n_inc) * m.Ks();
             
         }
         
         // compute reflected ray
         if (m.Ns() > 25) {
             // we shine
-            reflectedColor = (m.Ns() / 100.0) * traceReflectedRay(level+1, n, p, ray);
+            reflectedColor = (m.Ns() / 100.0) * traceReflectedRay(level+1, normal, p, ray);
         }
         
-        directLight += ambient + diffuse + specular + reflectedColor + refractedColor;
+        directLight += ambient + diffuse + specular + reflectedColor;
 
     }
     
