@@ -75,13 +75,14 @@ void BoundingBox::expand(Triangle triangle) {
     }
 }
 
-// Method to check if a ray hit a bounding box
+// Method to check if a ray hit a bounding box (ray/box intersection)
 bool BoundingBox::hit(Vec3Df rayOrigin, Vec3Df rayDestination) {
     float tmin = std::numeric_limits<float>::min(),
     tmax = std::numeric_limits<float>::max();
     
     Vec3Df rayDir = rayDestination - rayOrigin;
     
+	//Check if x direction of the ray goes between the minimum and maximum x-values of the boundingbox
     if (rayDir[0] != 0.0) {
         float tx1 = (min[0] - rayOrigin[0]) / rayDir[0];
         float tx2 = (max[0] - rayOrigin[0]) / rayDir[0];
@@ -93,6 +94,7 @@ bool BoundingBox::hit(Vec3Df rayOrigin, Vec3Df rayDestination) {
         return false;
     }
     
+	//Check if y direction of the ray goes between the minimum and maximum x-values of the boundingbox
     if (rayDir[1] != 0.0) {
         float tx1 = (min[1] - rayOrigin[1]) / rayDir[1];
         float tx2 = (max[1] - rayOrigin[1]) / rayDir[1];
@@ -104,6 +106,7 @@ bool BoundingBox::hit(Vec3Df rayOrigin, Vec3Df rayDestination) {
         return false;
     }
     
+	//Check if z direction of the ray goes between the minimum and maximum x-values of the boundingbox
     if (rayDir[2] != 0.0) {
         float tx1 = (min[2] - rayOrigin[2]) / rayDir[2];
         float tx2 = (max[2] - rayOrigin[2]) / rayDir[2];
@@ -115,6 +118,7 @@ bool BoundingBox::hit(Vec3Df rayOrigin, Vec3Df rayDestination) {
         return false;
     }
     
+	// return if the ray intersects the boundingbox
     return tmax >= tmin;
 }
 
@@ -127,6 +131,7 @@ BoundingBox getBB(Triangle triangle) {
     Vec3Df min = Vec3Df(vertex[0], vertex[1], vertex[2]);
     Vec3Df max = Vec3Df(vertex[0], vertex[1], vertex[2]);
     
+	// find the smallest x, y and z out of all three vertices of the triangle
     for (int i = 1; i < 3; i++) {
         Vec3Df vertex = MyMesh.vertices[triangle.v[i]].p;
         if (vertex[0] < min[0])
@@ -176,15 +181,18 @@ public:
 
 // Builds a kdtree
 KDNode* KDNode::build(std::vector<int>& triangles, int depth) const {
+	// initialize nodes
     KDNode* node = new KDNode();
     node->triangles = triangles;
     node->left = NULL;
     node->right = NULL;
     node->bbox = BoundingBox();
     
+	// If no triangles the tree is empty
     if (triangles.size() == 0)
         return node;
     
+	// Handle 1 triangle corner scenario
     if (triangles.size() == 1) {
         node->bbox = getBB(MyMesh.triangles[triangles[0]]);
         node->left = new KDNode();
@@ -197,6 +205,7 @@ KDNode* KDNode::build(std::vector<int>& triangles, int depth) const {
     // get a bounding box surrounding all the triangles
     node->bbox = getBB(MyMesh.triangles[triangles[0]]);
     
+	// build the tree
     for (int i = 1; i < triangles.size(); i++) {
         node->bbox.expand(MyMesh.triangles[triangles[i]]);
     }
@@ -311,6 +320,7 @@ float intersectPlane(const Vec3Df & rayOrigin, const Vec3Df & rayDestination, co
     
     Vec3Df n = getNormal(triangle);
     
+	// If necessary turn around the normal
     if (Vec3Df::dotProduct(n, v0) < 0 || Vec3Df::dotProduct(n, v1) < 0 || Vec3Df::dotProduct(n, v2) < 0)
     {
         n *= -1;
@@ -321,6 +331,7 @@ float intersectPlane(const Vec3Df & rayOrigin, const Vec3Df & rayDestination, co
     float D = Vec3Df::dotProduct(v2, n);
     float distanceFromRayToNormal = Vec3Df::dotProduct(rayDirection, n);
     
+	// compute actual  ray triangle intersection point
     if (!(distanceFromRayToNormal < 0.0001f && distanceFromRayToNormal > -0.0001f)){
         float t = (D - (Vec3Df::dotProduct(rayOrigin, n))) / distanceFromRayToNormal;
         return t;
@@ -457,6 +468,7 @@ bool pointInTriangle(const Vec3Df & p, const Triangle & triangle)
     float b;
     Barycentric(p, v0, v1, v2, a, b);
     
+	// compute if the point is within the triangle borders
     if (a >= 0 && a <= 1 && b >= 0 && (a + b) <= 1)
     {
         return true;
@@ -596,6 +608,7 @@ Vec3Df surfaceNormalTriangle(const Vertex & v0, const Vertex & v1, const Vertex 
     return product;
 }
 
+// Return the normal of a triangle
 Vec3Df getNormal(const Triangle & triangle)
 {
     Vec3Df edge01 = MyMesh.vertices[triangle.v[1]].p - MyMesh.vertices[triangle.v[0]].p;
@@ -605,6 +618,7 @@ Vec3Df getNormal(const Triangle & triangle)
     return n;
 }
 
+// Computes the hitpoint within vectors a, b and c
 void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float &v, float &w)
 {
     Vec3Df v0 = b - a, v1 = c - a, v2 = p - a;
@@ -619,6 +633,7 @@ void computeBarycentric(Vec3Df p, Vec3Df a, Vec3Df b, Vec3Df c, float &u, float 
     u = 1.0f - v - w;
 }
 
+// Equals method for two vectors
 bool equals(const Vec3Df & one, const Vec3Df & two) {
     return fabs(one[0] - two[0]) < 1 && fabs(one[1] - two[1]) < 1 && fabs(one[2] - two[2]) < 1;
 }
@@ -637,6 +652,7 @@ Vec3Df blendColors(const Vec3Df & c1, const Vec3Df & c2, const float a)
     return c1;
 }
 
+// Method to draw the debugger screen every frame
 void yourDebugDraw()
 {
 	//draw open gl debug stuff
@@ -670,6 +686,7 @@ void yourDebugDraw()
 	glColor3f(0,0,1);
 	glVertex3f(testRayDestination[0], testRayDestination[1], testRayDestination[2]);
 	glEnd();
+	// Draw the ray for moving a light
 	glBegin(GL_LINES);
 	glColor3f(red, green, blue);
 	glVertex3f(moveLightRayOrigin[0], moveLightRayOrigin[1], moveLightRayOrigin[2]);
@@ -719,9 +736,13 @@ void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3
     set = false;
 	Vec3Df offset;
 	
+	// t is the key character
 	switch (t) {
+	// Set new light
 	case 'L': selectedLight = MyLightPositions.size() - 1; break;
+	// switch between selected light to move 
 	case 'f': selectedLight = (selectedLight + 1) % MyLightPositions.size(); break;
+	// set x-axis to be the ray along the light will move
 	case 'x': {
 		moveLightDirection[0] = 0.1;
 		moveLightDirection[1] = 0;
@@ -729,6 +750,7 @@ void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3
 		red = 0; green = 0; blue = 1;
 		setMoveLightRay("x"); break;
 	}
+	// set y-axis to be the ray along the light will move
 	case 'y': {
 		moveLightDirection[0] = 0;
 		moveLightDirection[1] = 0.1;
@@ -736,6 +758,7 @@ void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3
 		red = 1; green = 0; blue = 0;
 		setMoveLightRay("y"); break;
 	}
+    // set z-axis to be the ray along the light will move
 	case 'z': { 
 		moveLightDirection[0] = 0;
 		moveLightDirection[1] = 0;
@@ -743,12 +766,14 @@ void yourKeyboardFunc(char t, int x, int y, const Vec3Df & rayOrigin, const Vec3
 		red = 0; green = 1; blue = 0;
 		setMoveLightRay("z"); break;
 	}
+	// Move light position
 	case 'w': MyLightPositions[selectedLight] = MyLightPositions[selectedLight] + moveLightDirection; break;
 	case 's': MyLightPositions[selectedLight] = MyLightPositions[selectedLight] + moveLightDirection * -1; break;
 	}	
 	std::cout<<t<<" pressed! The mouse was in location "<<x<<","<<y<<"!"<<std::endl;	
 }
 
+// Computes the ray dependent move light direction  
 void setMoveLightRay(std::string dir) {
 	Vec3Df lastLight = MyLightPositions[selectedLight];
 	moveLightRayOrigin = moveLightDirection * 100 + lastLight;
